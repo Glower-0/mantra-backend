@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MANTRA | Panel de Control de Dueño</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/js/all.min.js"></script>
+    <style>
+        :root {
+            --primary: #a78bfa; 
+            --accent: #f472b6;
+            --bg-dark: #0a0a0c;
+            --card-bg: #16161a;
+            --text-main: #ffffff;
+            --text-dim: #9ca3af;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--bg-dark);
+            color: var(--text-main);
+            margin: 0;
+            padding: 0;
+        }
+
+        .navbar {
+            background-color: rgba(22, 22, 26, 0.95);
+            padding: 1rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid #222228;
+        }
+
+        .logo {
+            font-size: 1.5rem;
+            font-weight: bold;
+            letter-spacing: 2px;
+            background: linear-gradient(45deg, var(--primary), var(--accent));
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .btn-logout {
+            background: none;
+            border: 1px solid #ff4a4a;
+            color: #ff4a4a;
+            padding: 0.5rem 1rem;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 600;
+        }
+
+        .btn-logout:hover {
+            background-color: #ff4a4a;
+            color: white;
+        }
+
+        .container {
+            max-width: 1000px;
+            margin: 2rem auto;
+            padding: 0 1rem;
+        }
+
+        .header-section {
+            margin-bottom: 2rem;
+            border-left: 4px solid var(--accent);
+            padding-left: 15px;
+        }
+
+        .header-section h1 { margin: 0; font-size: 2rem; }
+        .header-section p { color: var(--text-dim); margin: 5px 0 0 0; }
+
+        /* Tabla de Control de Usuarios */
+        .table-container {
+            background-color: var(--card-bg);
+            border: 1px solid #222228;
+            border-radius: 12px;
+            overflow: hidden;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            text-align: left;
+        }
+
+        th, td {
+            padding: 1rem 1.5rem;
+            border-bottom: 1px solid #222228;
+        }
+
+        th {
+            background-color: #111115;
+            color: var(--primary);
+            font-weight: 600;
+            text-transform: uppercase;
+            font-size: 0.85rem;
+            letter-spacing: 1px;
+        }
+
+        tr:hover {
+            background-color: #1a1a22;
+        }
+
+        .badge {
+            padding: 0.3rem 0.6rem;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: bold;
+        }
+
+        .badge-owner { background: rgba(244, 114, 182, 0.15); color: #f472b6; }
+        .badge-org { background: rgba(167, 139, 250, 0.15); color: #a78bfa; }
+        .badge-user { background: rgba(0, 210, 255, 0.15); color: #00d2ff; }
+    </style>
+</head>
+<body>
+
+    <nav class="navbar">
+        <div class="logo">MANTRA | Consola Suprema</div>
+        <div>
+            <span id="welcomeTxt" style="margin-right: 15px; font-weight: bold; color: var(--accent);">Dueño</span>
+            <button class="btn-logout" onclick="logout()">Cerrar Sistema</button>
+        </div>
+    </nav>
+
+    <main class="container">
+        <div class="header-section">
+            <h1>Control Global de Usuarios</h1>
+            <p>Monitoreo en tiempo real de cuentas registradas en PostgreSQL.</p>
+        </div>
+
+        <div class="table-container">
+            <table>
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Nombre Completo</th>
+                        <th>Correo Electrónico</th>
+                        <th>Nivel de Acceso</th>
+                    </tr>
+                </thead>
+                <tbody id="usersTableBody">
+                    <tr>
+                        <td colspan="4" style="color: var(--text-dim); text-align: center;">Consultando registros del servidor...</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </main>
+
+    <script>
+        const usuarioSesion = JSON.parse(localStorage.getItem('usuarioMantra'));
+
+        // Proteger la pantalla: Si no es el correo del dueño, lo echa
+        if (!usuarioSesion || usuarioSesion.rol !== 'owner') {
+            alert("Acceso Restringido. Esta consola es exclusiva para los dueños de MANTRA.");
+            window.location.href = 'index.html';
+        } else {
+            document.getElementById('welcomeTxt').innerText = `👑 Master: ${usuarioSesion.nombre}`;
+        }
+
+        // Consultar la lista completa de la BD
+        async function cargarUsuarios() {
+            try {
+                const response = await fetch('/api/owner/usuarios');
+                const usuarios = await response.json();
+
+                const tbody = document.getElementById('usersTableBody');
+                tbody.innerHTML = '';
+
+                usuarios.forEach(user => {
+                    let badgeClass = 'badge-user';
+                    let labelRol = 'Asistente';
+
+                    if (user.email === 'owner@mantra.com') {
+                        badgeClass = 'badge-owner';
+                        labelRol = 'Dueño Suprema';
+                    } else if (user.es_organizador) {
+                        badgeClass = 'badge-org';
+                        labelRol = 'Organizador / Admin';
+                    }
+
+                    const row = document.createElement('tr');
+                    row.innerHTML = `
+                        <td style="color: var(--primary); font-weight: bold;">#${user.id_usuario}</td>
+                        <td>${user.nombre}</td>
+                        <td style="color: var(--text-dim);">${user.email}</td>
+                        <td><span class="badge ${badgeClass}">${labelRol}</span></td>
+                    `;
+                    tbody.appendChild(row);
+                });
+
+            } catch (error) {
+                console.error("Error:", error);
+                document.getElementById('usersTableBody').innerHTML = `<tr><td colspan="4" style="color: #ff4a4a; text-align: center;">Error de comunicación con Render.</td></tr>`;
+            }
+        }
+
+        function logout() {
+            localStorage.removeItem('usuarioMantra');
+            window.location.href = 'index.html';
+        }
+
+        cargarUsuarios();
+    </script>
+</body>
+</html>
