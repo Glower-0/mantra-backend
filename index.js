@@ -17,7 +17,7 @@ app.use(express.static(path.join(__dirname)));
 const pool = new Pool({
   connectionString: 'postgres://prueba_user:A6O4L906bOn9BInyVcoT6Sg2D7hK1g3C@dpg-cv0p9f0gph6c73eqg8ug-a.oregon-postgres.render.com/prueba',
   ssl: {
-    rejectUnauthorized: false // Obligatorio para evitar bloqueos por certificados SSL en la nube
+    rejectUnauthorized: false
   }
 });
 
