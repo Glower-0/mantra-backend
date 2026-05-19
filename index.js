@@ -19,7 +19,7 @@ postgresql://prueba_user:vBoIOpHsWa6gq7pB99h8hrI7aQUtmrMg@dpg-d86f9hjbc2fs73bs6r
 });
 // Verificar la conexión con la base de datos al encender el servidor
 const pool = new Pool({
-  connectionString: 'postgres://prueba_user:TU_CONTRASEÑA_REAL@dpg-d86f9h.../prueba_837o',
+  connectionString: 'postgres://prueba_user:vBoIOpHsWa6gq7pB99h8hrI7aQUtmrMg',
   ssl: {
     rejectUnauthorized: false
   }
