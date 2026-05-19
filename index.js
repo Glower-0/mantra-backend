@@ -4,7 +4,7 @@ const path = require('path');
 require('dotenv').config();
 
 const app = express();
-const PORT = process.env.PORT || 3000;
+const PORT = process.env.PORT || 1000;
 
 // 1. Middlewares para procesar datos e interactuar con el HTML
 app.use(express.json());
@@ -18,19 +18,29 @@ app.use(express.static(path.join(__dirname)));
 postgresql://prueba_user:vBoIOpHsWa6gq7pB99h8hrI7aQUtmrMg@dpg-d86f9hjbc2fs73bs6rl0-a/prueba_837o
 });
 // Verificar la conexión con la base de datos al encender el servidor
-pool.query('SELECT NOW()', (err, res) => {
-  if (err) {
-    console.error('❌ Error al conectar a la base de datos de Render:', err.stack);
-  } else {
-    console.log('✅ Conexión segura establecida con PostgreSQL en la nube (Render)');
+const pool = new Pool({
+  connectionString: 'postgres://prueba_user:TU_CONTRASEÑA_REAL@dpg-d86f9h.../prueba_837o',
+  ssl: {
+    rejectUnauthorized: false
   }
 });
 
-// 3. Ruta principal: Carga la página de inicio (Login/Registro)
+// Verificación de conexión
+pool.query('SELECT NOW()', (err, res) => {
+  if (err) {
+    console.error('❌ Error al conectar:', err.stack);
+  } else {
+    console.log('✅ Conexión establecida');
+  }
+});
+
 app.get('/', (req, res) => {
   res.sendFile(path.join(__dirname, 'index.html'));
 });
 
+app.listen(PORT, () => {
+  console.log(`🚀 Servidor corriendo en el puerto ${PORT}`);
+});
 // 4. API de Login: Identifica las credenciales y determina el rol del usuario
 app.post('/api/login', async (req, res) => {
   const { email, password } = req.body;
