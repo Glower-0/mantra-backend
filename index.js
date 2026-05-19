@@ -14,13 +14,14 @@ app.use(express.urlencoded({ extended: true }));
 app.use(express.static(path.join(__dirname)));
 
 // 2. Configuración ROBUSTA para PostgreSQL usando la URL de conexión completa de Render
+// 2. Configuración ULTRA-SEGURA para saltar bloqueos de red
 const pool = new Pool({
-  connectionString: 'postgres://prueba_user:A6O4L906bOn9BInyVcoT6Sg2D7hK1g3C@dpg-cv0p9f0gph6c73eqg8ug-a.oregon-postgres.render.com/prueba',
+  connectionString: 'postgres://prueba_user:A6O4L906bOn9BInyVcoT6Sg2D7hK1g3C@dpg-cv0p9f0gph6c73eqg8ug-a.oregon-postgres.render.com/prueba?sslmode=require',
   ssl: {
     rejectUnauthorized: false
-  }
+  },
+  keepalives: true // Mantiene la conexión despierta para que Render no la corte inesperadamente
 });
-
 // Verificar la conexión con la base de datos al encender el servidor
 pool.query('SELECT NOW()', (err, res) => {
   if (err) {
