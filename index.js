@@ -13,15 +13,11 @@ app.use(express.urlencoded({ extended: true }));
 // Servir archivos estáticos (HTML, CSS, JS) desde la carpeta raíz del proyecto
 app.use(express.static(path.join(__dirname)));
 
-// 2. Configuración de conexión a PostgreSQL usando variables de entorno o credenciales directas
+// 2. Configuración ROBUSTA para PostgreSQL usando la URL de conexión completa de Render
 const pool = new Pool({
-  user: 'prueba_user',
-  host: 'dpg-cv0p9f0gph6c73eqg8ug-a.oregon-postgres.render.com',
-  database: 'prueba',
-  password: 'A6O4L906bOn9BInyVcoT6Sg2D7hK1g3C',
-  port: 5432,
+  connectionString: 'postgres://prueba_user:A6O4L906bOn9BInyVcoT6Sg2D7hK1g3C@dpg-cv0p9f0gph6c73eqg8ug-a.oregon-postgres.render.com/prueba',
   ssl: {
-    rejectUnauthorized: false // Obligatorio para que Render no bloquee el acceso por certificados SSL
+    rejectUnauthorized: false // Obligatorio para evitar bloqueos por certificados SSL en la nube
   }
 });
 
