@@ -631,7 +631,128 @@ app.get('/api/owner/usuarios', async (req, res) => {
     });
   }
 });
+/* ==========================
+   CREAR RESEÑA
+========================== */
 
+app.post('/api/resenas', async(req,res)=>{
+
+try{
+
+const {
+calificacion,
+comentario,
+id_evento,
+id_participante
+}
+= req.body;
+
+const nextId =
+await pool.query(
+`
+SELECT
+COALESCE(MAX(id_resena),0)+1
+AS id
+FROM public.resena
+`
+);
+
+const idResena =
+nextId.rows[0].id;
+
+await pool.query(
+`
+INSERT INTO public.resena
+(
+id_resena,
+calificacion,
+comentario,
+fecha_publicacion,
+id_evento,
+id_participante
+)
+VALUES
+($1,$2,$3,CURRENT_DATE,$4,$5)
+`,
+[
+idResena,
+calificacion,
+comentario,
+id_evento,
+id_participante
+]
+);
+
+res.json({
+success:true,
+message:
+'Reseña publicada'
+});
+
+}catch(error){
+
+console.error(error);
+
+res.status(500).json({
+error:
+'Error creando reseña'
+});
+
+}
+
+});
+
+/* ==========================
+   OBTENER RESEÑAS
+========================== */
+
+app.get(
+'/api/resenas/:idEvento',
+async(req,res)=>{
+
+try{
+
+const idEvento =
+req.params.idEvento;
+
+const resenas =
+await pool.query(
+`
+SELECT
+r.calificacion,
+r.comentario,
+r.fecha_publicacion,
+u.nombre
+FROM public.resena r
+
+JOIN public.usuario u
+ON r.id_participante =
+u.id_usuario
+
+WHERE r.id_evento = $1
+
+ORDER BY
+r.fecha_publicacion DESC
+`,
+[idEvento]
+);
+
+res.json(
+resenas.rows
+);
+
+}catch(error){
+
+console.error(error);
+
+res.status(500).json({
+error:
+'Error obteniendo reseñas'
+});
+
+}
+
+});
 /* ==========================
    SERVER
 ========================== */
