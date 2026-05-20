@@ -1,0 +1,319 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>Registro Organizador | MANTRA</title>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+<style>
+
+*{
+margin:0;
+padding:0;
+box-sizing:border-box;
+font-family:'Poppins',sans-serif;
+}
+
+body{
+background:
+linear-gradient(rgba(0,0,0,.75),rgba(0,0,0,.85)),
+url('https://images.unsplash.com/photo-1492684223066-81342ee5ff30?w=1920');
+background-size:cover;
+background-position:center;
+min-height:100vh;
+display:flex;
+justify-content:center;
+align-items:center;
+padding:30px;
+}
+
+.container{
+width:100%;
+max-width:650px;
+background:rgba(255,255,255,.08);
+backdrop-filter:blur(20px);
+border:1px solid rgba(255,255,255,.1);
+border-radius:30px;
+padding:45px;
+color:white;
+box-shadow:0 15px 40px rgba(0,0,0,.35);
+}
+
+h1{
+text-align:center;
+font-size:2.3rem;
+margin-bottom:10px;
+}
+
+.subtitle{
+text-align:center;
+color:#cfcfcf;
+margin-bottom:35px;
+}
+
+.input-group{
+margin-bottom:20px;
+}
+
+label{
+display:block;
+margin-bottom:8px;
+font-size:.95rem;
+font-weight:500;
+}
+
+input,
+textarea{
+width:100%;
+padding:16px;
+border:none;
+border-radius:16px;
+background:#1d1d1d;
+color:white;
+font-size:1rem;
+outline:none;
+}
+
+textarea{
+resize:none;
+height:120px;
+}
+
+button{
+width:100%;
+padding:17px;
+border:none;
+border-radius:18px;
+background:#00BFFF;
+color:white;
+font-size:1rem;
+font-weight:600;
+cursor:pointer;
+transition:.3s;
+}
+
+button:hover{
+transform:translateY(-3px);
+box-shadow:0 10px 25px rgba(0,191,255,.3);
+}
+
+.message{
+margin-top:20px;
+text-align:center;
+font-weight:500;
+}
+
+.back{
+display:block;
+text-align:center;
+margin-top:20px;
+text-decoration:none;
+color:#ccc;
+transition:.3s;
+}
+
+.back:hover{
+color:#00BFFF;
+}
+
+.badges{
+display:flex;
+justify-content:center;
+gap:12px;
+margin-bottom:25px;
+flex-wrap:wrap;
+}
+
+.badge{
+background:rgba(0,191,255,.15);
+padding:10px 15px;
+border-radius:50px;
+font-size:.9rem;
+border:1px solid rgba(0,191,255,.3);
+}
+
+@media(max-width:768px){
+
+.container{
+padding:30px;
+}
+
+h1{
+font-size:1.9rem;
+}
+
+}
+
+</style>
+</head>
+
+<body>
+
+<div class="container">
+
+<h1>🎤 Crear cuenta de Organizador</h1>
+
+<p class="subtitle">
+Publica eventos, analiza estadísticas y haz crecer tu comunidad
+</p>
+
+<div class="badges">
+<div class="badge">📊 Estadísticas</div>
+<div class="badge">🎟 Publicar eventos</div>
+<div class="badge">⭐ Reputación</div>
+</div>
+
+<form id="registroOrganizadorForm">
+
+<div class="input-group">
+<label>Nombre o empresa organizadora</label>
+<input
+type="text"
+id="nombre"
+required
+>
+</div>
+
+<div class="input-group">
+<label>Correo electrónico</label>
+<input
+type="email"
+id="email"
+required
+>
+</div>
+
+<div class="input-group">
+<label>Contraseña</label>
+<input
+type="password"
+id="password"
+required
+>
+</div>
+
+<div class="input-group">
+<label>Edad</label>
+<input
+type="number"
+id="edad"
+required
+>
+</div>
+
+<div class="input-group">
+<label>Biografía / Descripción</label>
+<textarea
+id="biografia"
+placeholder="Cuéntanos sobre ti o tu empresa..."
+></textarea>
+</div>
+
+<button type="submit">
+Crear cuenta de organizador
+</button>
+
+<div class="message" id="message"></div>
+
+</form>
+
+<a href="index.html" class="back">
+← Volver al inicio
+</a>
+
+</div>
+
+<script>
+
+document
+.getElementById('registroOrganizadorForm')
+.addEventListener('submit', async(e)=>{
+
+e.preventDefault();
+
+const data = {
+
+nombre:
+document.getElementById('nombre').value,
+
+email:
+document.getElementById('email').value,
+
+password:
+document.getElementById('password').value,
+
+edad:
+document.getElementById('edad').value,
+
+biografia:
+document.getElementById('biografia').value
+
+};
+
+const message =
+document.getElementById('message');
+
+try{
+
+const response = await fetch(
+'/api/register/organizador',
+{
+method:'POST',
+
+headers:{
+'Content-Type':'application/json'
+},
+
+body:JSON.stringify(data)
+}
+);
+
+const result =
+await response.json();
+
+if(!response.ok){
+
+message.style.color =
+'#ff5a5a';
+
+message.innerText =
+result.error;
+
+return;
+}
+
+message.style.color =
+'#00ff99';
+
+message.innerText =
+'Cuenta de organizador creada 🎉';
+
+setTimeout(()=>{
+
+window.location.href =
+'index.html';
+
+},1500);
+
+}catch(error){
+
+console.error(error);
+
+message.style.color =
+'#ff5a5a';
+
+message.innerText =
+'Error de conexión';
+
+}
+
+});
+
+</script>
+
+</body>
+</html>
