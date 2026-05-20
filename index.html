@@ -18,142 +18,51 @@
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             background-color: var(--bg-color);
             color: var(--text-color);
-            margin: 0;
-            padding: 0;
-            display: flex;
-            flex-direction: column;
-            min-height: 100vh;
+            margin: 0; padding: 0;
+            display: flex; flex-direction: column; min-height: 100vh;
         }
 
         header {
             background-color: rgba(20, 20, 28, 0.8);
             backdrop-filter: blur(10px);
             padding: 1rem 2rem;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
+            display: flex; justify-content: space-between; align-items: center;
             border-bottom: 1px solid #232330;
-            position: sticky;
-            top: 0;
-            z-index: 100;
+            position: sticky; top: 0; z-index: 100;
         }
+        
         .logo {
-            font-size: 1.8rem;
-            font-weight: bold;
-            letter-spacing: 2px;
+            font-size: 1.8rem; font-weight: bold; letter-spacing: 2px;
             background: linear-gradient(to right, #8b5cf6, #ec4899);
-            -webkit-background-clip: text;
-            background-clip: text; /* <--- Agrega esta línea para quitar la advertencia de VS Code */
+            -webkit-background-clip: text; background-clip: text;
             -webkit-text-fill-color: transparent;
         }   
 
-        .nav-buttons .btn {
+        .btn {
             background-color: var(--accent-color);
-            color: white;
-            border: none;
-            padding: 0.6rem 1.2rem;
-            border-radius: 8px;
-            cursor: pointer;
-            font-weight: 600;
+            color: white; border: none; padding: 0.6rem 1.2rem;
+            border-radius: 8px; cursor: pointer; font-weight: 600;
             transition: background 0.2s;
         }
 
-        .nav-buttons .btn:hover {
-            background-color: var(--accent-hover);
-        }
+        /* --- Estilos del Modal Mejorado --- */
+        .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0, 0, 0, 0.8); backdrop-filter: blur(5px); justify-content: center; align-items: center; z-index: 1000; }
+        .modal-content { background-color: var(--card-bg); padding: 2rem; border-radius: 16px; width: 100%; max-width: 400px; border: 1px solid #232330; position: relative; }
+        .close-btn { position: absolute; top: 15px; right: 20px; font-size: 1.5rem; cursor: pointer; color: var(--text-muted); }
 
-        main {
-            flex: 1;
-            padding: 3rem 2rem;
-            max-width: 1200px;
-            margin: 0 auto;
-            text-align: center;
-        }
-
-        .hero h1 {
-            font-size: 3.5rem;
-            margin-bottom: 1rem;
-        }
-
-        .hero p {
-            color: var(--text-muted);
-            font-size: 1.2rem;
-            max-width: 600px;
-            margin: 0 auto 3rem auto;
-        }
-
-        /* Estilos del Modal de Login */
-        .modal {
-            display: none;
-            position: fixed;
-            top: 0; left: 0; width: 100%; height: 100%;
-            background-color: rgba(0, 0, 0, 0.75);
-            backdrop-filter: blur(5px);
-            justify-content: center;
-            align-items: center;
-            z-index: 1000;
-        }
-
-        .modal-content {
-            background-color: var(--card-bg);
-            padding: 2.5rem;
-            border-radius: 16px;
-            width: 100%;
-            max-width: 400px;
-            border: 1px solid #232330;
-            box-shadow: 0 10px 25px rgba(0,0,0,0.5);
-            position: relative;
-        }
-
-        .close-btn {
-            position: absolute;
-            top: 15px; right: 20px;
-            font-size: 1.5rem;
-            cursor: pointer;
-            color: var(--text-muted);
-        }
-
-        .form-group {
-            margin-bottom: 1.5rem;
-            text-align: left;
-        }
-
-        .form-group label {
-            display: block;
-            margin-bottom: 0.5rem;
-            color: var(--text-muted);
-        }
-
-        .form-group input {
-            width: 100%;
-            padding: 0.8rem;
-            border-radius: 8px;
-            border: 1px solid #232330;
-            background-color: #0b0b0f;
-            color: white;
-            box-sizing: border-box;
-        }
-
-        .form-group input:focus {
-            border-color: var(--accent-color);
-            outline: none;
-        }
-
-        .submit-btn {
-            width: 100%;
-            background-color: var(--accent-color);
-            color: white;
-            border: none;
-            padding: 0.8rem;
-            border-radius: 8px;
-            font-weight: bold;
-            cursor: pointer;
-            font-size: 1rem;
-        }
-
-        .submit-btn:hover {
-            background-color: var(--accent-hover);
-        }
+        /* Tabs Navigation */
+        .tabs { display: flex; border-bottom: 2px solid #232330; margin-bottom: 1.5rem; }
+        .tab-btn { flex: 1; padding: 10px; background: none; border: none; color: var(--text-muted); cursor: pointer; font-weight: bold; }
+        .tab-btn.active { color: var(--accent-color); border-bottom: 2px solid var(--accent-color); }
+        
+        .form-panel { display: none; }
+        .form-panel.active { display: block; }
+        
+        .form-group { margin-bottom: 1rem; text-align: left; }
+        .form-group label { display: block; margin-bottom: 0.3rem; color: var(--text-muted); font-size: 0.9rem; }
+        .form-group input, .form-group select { width: 100%; padding: 0.8rem; border-radius: 8px; border: 1px solid #232330; background-color: #0b0b0f; color: white; box-sizing: border-box; }
+        
+        .submit-btn { width: 100%; background-color: var(--accent-color); color: white; border: none; padding: 0.8rem; border-radius: 8px; font-weight: bold; cursor: pointer; margin-top: 1rem; }
     </style>
 </head>
 <body>
@@ -175,75 +84,89 @@
     <div id="loginModal" class="modal">
         <div class="modal-content">
             <span class="close-btn" onclick="closeModal()">&times;</span>
-            <h2 style="margin-top: 0; margin-bottom: 1.5rem;">Entrar a Mantra</h2>
             
-            <div class="form-group">
-                <label for="userEmail">Correo Electrónico</label>
-                <input type="email" id="userEmail" placeholder="ejemplo@mantra.com">
+            <div class="tabs">
+                <button class="tab-btn active" onclick="switchTab('login')">Ingresar</button>
+                <button class="tab-btn" onclick="switchTab('register')">Registrarse</button>
             </div>
 
-            <div class="form-group">
-                <label for="userPassword">Contraseña</label>
-                <input type="password" id="userPassword" placeholder="••••••••">
+            <div id="loginPanel" class="form-panel active">
+                <div class="form-group"><label>Correo</label><input type="email" id="loginEmail"></div>
+                <div class="form-group"><label>Contraseña</label><input type="password" id="loginPass"></div>
+                <button class="submit-btn" onclick="processLogin()">Acceder</button>
             </div>
 
-            <button class="submit-btn" onclick="processLogin()">Ingresar Seguro</button>
+            <div id="registerPanel" class="form-panel">
+                <div class="form-group"><label>Nombre</label><input type="text" id="regName"></div>
+                <div class="form-group"><label>Correo</label><input type="email" id="regEmail"></div>
+                <div class="form-group"><label>Contraseña</label><input type="password" id="regPass"></div>
+                <div class="form-group">
+                    <label>Tipo de Usuario</label>
+                    <select id="regRole">
+                        <option value="participante">Participante</option>
+                        <option value="organizador">Organizador</option>
+                    </select>
+                </div>
+                <button class="submit-btn" onclick="processRegister()">Crear Cuenta</button>
+            </div>
         </div>
     </div>
 
     <script>
-        function openModal() {
-            document.getElementById('loginModal').style.display = 'flex';
-        }
+        function openModal() { document.getElementById('loginModal').style.display = 'flex'; }
+        function closeModal() { document.getElementById('loginModal').style.display = 'none'; }
 
-        function closeModal() {
-            document.getElementById('loginModal').style.display = 'none';
+        function switchTab(tab) {
+            document.querySelectorAll('.form-panel').forEach(p => p.classList.remove('active'));
+            document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+            if(tab === 'login') {
+                document.getElementById('loginPanel').classList.add('active');
+                document.querySelector('.tab-btn:nth-child(1)').classList.add('active');
+            } else {
+                document.getElementById('registerPanel').classList.add('active');
+                document.querySelector('.tab-btn:nth-child(2)').classList.add('active');
+            }
         }
 
         async function processLogin() {
-            const emailInput = document.getElementById('userEmail').value;
-            const passwordInput = document.getElementById('userPassword').value;
+            const email = document.getElementById('loginEmail').value;
+            const password = document.getElementById('loginPass').value;
+            
+            const response = await fetch('/api/login', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ email, password })
+            });
 
-            if (!emailInput || !passwordInput) {
-                alert("Por favor, llena todos los campos.");
-                return;
-            }
-
-            try {
-                // Petición directa a la API de tu index.js
-                const response = await fetch('/api/login', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify({ email: emailInput, password: passwordInput })
-                });
-
-                const data = await response.json();
-
-                if (!response.ok) {
-                    alert(data.error || "Error al iniciar sesión");
-                    return;
-                }
-
-                alert(`¡Bienvenido a MANTRA, ${data.usuario.nombre}!`);
-                closeModal();
-
-                // Guardar datos en la sesión del navegador
+            const data = await response.json();
+            if (response.ok) {
+                alert(`Bienvenido, ${data.usuario.nombre}`);
                 localStorage.setItem('usuarioMantra', JSON.stringify(data.usuario));
+                window.location.href = data.usuario.rol === 'organizador' ? 'hugo-dashboard.html' : 'feed-eventos.html';
+            } else {
+                alert(data.error);
+            }
+        }
 
-                // Redirección inteligente según el rol que viene desde la BD en Render
-                if (data.usuario.role === 'owner' || data.usuario.rol === 'owner') {
-                    window.location.href = 'owner-dashboard.html';
-                } else if (data.usuario.role === 'organizador' || data.usuario.rol === 'organizador') {
-                    window.location.href = 'hugo-dashboard.html';
-                } else {
-                    window.location.href = 'feed-eventos.html';
-                }
+        async function processRegister() {
+            const data = {
+                nombre: document.getElementById('regName').value,
+                email: document.getElementById('regEmail').value,
+                password: document.getElementById('regPass').value,
+                rol: document.getElementById('regRole').value
+            };
 
-            } catch (error) {
-                console.error("Error en la conexión:", error);
-                alert("No se pudo conectar con el servidor de Render.");
+            const response = await fetch('/api/register', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(data)
+            });
+
+            if (response.ok) {
+                alert("Cuenta creada con éxito. Ahora inicia sesión.");
+                switchTab('login');
+            } else {
+                alert("Error al registrar.");
             }
         }
     </script>
