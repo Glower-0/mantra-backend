@@ -236,13 +236,25 @@ Cambiar foto
 <p id="bio">Sin biografía.</p>
 <span class="intereses" id="intereses">Sin intereses</span>
 </div>
-<div style="margin-top:25px;">
+<button
+id="btnEditarPerfil"
+onclick="mostrarEditorPerfil()"
+style="margin-top:25px;padding:13px 18px;border:none;border-radius:15px;background:#00bfff;color:white;font-weight:700;cursor:pointer;"
+>
+Editar perfil
+</button>
+
+<div id="editorPerfil" style="display:none;margin-top:25px;">
   <textarea id="editBio" placeholder="Editar biografía..." style="width:100%;height:90px;padding:14px;border:none;border-radius:16px;background:#1d1d29;color:white;resize:none;margin-bottom:12px;"></textarea>
 
   <input id="editIntereses" placeholder="Editar intereses" style="width:100%;padding:14px;border:none;border-radius:16px;background:#1d1d29;color:white;margin-bottom:12px;">
 
   <button onclick="guardarPerfil()" style="padding:13px 18px;border:none;border-radius:15px;background:#00bfff;color:white;font-weight:700;cursor:pointer;">
     Guardar cambios
+  </button>
+
+  <button onclick="ocultarEditorPerfil()" style="padding:13px 18px;border:none;border-radius:15px;background:#1d1d29;color:white;font-weight:700;cursor:pointer;margin-left:8px;">
+    Cancelar
   </button>
 </div>
 </section>
