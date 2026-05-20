@@ -6,44 +6,36 @@ require('dotenv').config();
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-// 1. Middlewares para procesar datos e interactuar con el HTML
+// 1. Middlewares
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
-
-// Servir archivos estáticos (HTML, CSS, JS) desde la carpeta raíz del proyecto
 app.use(express.static(path.join(__dirname)));
 
-// 2. Configuración de conexión a PostgreSQL usando variables de entorno
-// Render inyectará process.env.DATABASE_URL automáticamente en producción
+// 2. Conexión segura a PostgreSQL en Render
 const pool = new Pool({
-  user: process.env.DB_USER,
-  host: process.env.DB_HOST,
-  database: process.env.DB_NAME,
-  password: process.env.DB_PASSWORD,
-  port: process.env.DB_PORT,
+  connectionString: process.env.DATABASE_URL,
   ssl: {
     rejectUnauthorized: false
   }
 });
 
-// Verificar la conexión con la base de datos al encender el servidor
+// Verificar conexión al arrancar
 pool.query('SELECT NOW()', (err, res) => {
   if (err) {
-    console.error('❌ Error al conectar a la base de datos de Render:', err.stack);
+    console.error('❌ Error al conectar a la base de datos:', err.stack);
   } else {
     console.log('✅ Conexión segura establecida con PostgreSQL en la nube (Render)');
   }
 });
 
-// 3. Ruta principal: Carga la página de inicio (Login/Registro)
+// 3. Ruta raíz
 app.get('/', (req, res) => {
   res.sendFile(path.join(__dirname, 'index.html'));
 });
 
-// 4. API de Login: Identifica las credenciales y determina el rol del usuario
+// 4. API Login
 app.post('/api/login', async (req, res) => {
   const { email, password } = req.body;
-
   try {
     const userQuery = await pool.query(
       'SELECT id_usuario, nombre, email FROM public.usuario WHERE email = $1 AND password = $2',
@@ -55,48 +47,37 @@ app.post('/api/login', async (req, res) => {
     }
 
     const usuario = userQuery.rows[0];
-    let rol = 'asistidor'; 
+    let rol = 'asistidor';
 
     if (usuario.email === 'owner@mantra.com') {
-      rol = 'owner'; 
+      rol = 'owner';
     } else {
       const orgQuery = await pool.query(
         'SELECT id_usuario FROM public.organizador WHERE id_usuario = $1',
         [usuario.id_usuario]
       );
-      if (orgQuery.rows.length > 0) {
-        rol = 'organizador'; 
-      }
+      if (orgQuery.rows.length > 0) rol = 'organizador';
     }
 
     res.json({
       success: true,
-      usuario: {
-        id: usuario.id_usuario,
-        nombre: usuario.nombre,
-        email: usuario.email,
-        rol: rol
-      }
+      usuario: { id: usuario.id_usuario, nombre: usuario.nombre, email: usuario.email, rol: rol }
     });
-
   } catch (err) {
-    console.error('Error en la consulta de login:', err.stack);
-    res.status(500).json({ error: 'Ocurrió un error interno en el servidor.' });
+    console.error(err.stack);
+    res.status(500).json({ error: 'Error interno del servidor.' });
   }
 });
 
-// 5. API para traer el feed personalizado basado en las preferencias musicales del usuario
+// 5. API Feed
 app.get('/api/feed', async (req, res) => {
   const { id_usuario } = req.query;
-
   try {
     const queryFeed = `
       SELECT e.id_evento, e.titulo, e.fecha, e.ubicacion, c.nombre_categoria as categoria_musical
       FROM public.evento e
       JOIN public.categoria c ON e.id_categoria = c.id_categoria
-      WHERE e.id_categoria IN (
-          SELECT id_categoria FROM public.preferencia WHERE id_usuario = $1
-      )
+      WHERE e.id_categoria IN (SELECT id_categoria FROM public.preferencia WHERE id_usuario = $1)
       ORDER BY e.fecha ASC;
     `;
     const resultado = await pool.query(queryFeed, [id_usuario]);
@@ -107,7 +88,7 @@ app.get('/api/feed', async (req, res) => {
   }
 });
 
-// 6. API para registrar una nueva asistencia
+// 6. API Asistencia
 app.post('/api/asistencia', async (req, res) => {
   const { id_usuario, id_evento } = req.body;
   try {
@@ -122,7 +103,7 @@ app.post('/api/asistencia', async (req, res) => {
   }
 });
 
-// 7. API de Hugo (Métricas): Calcula el promedio de estrellas de sus eventos
+// 7. API Métricas
 app.get('/api/metricas', async (req, res) => {
   const { id_organizador } = req.query;
   try {
@@ -141,7 +122,7 @@ app.get('/api/metricas', async (req, res) => {
   }
 });
 
-// 8. API de Hugo (Crear Evento): Inserta una nueva fiesta en la base de datos
+// 8. API Crear Evento
 app.post('/api/evento', async (req, res) => {
   const { titulo, fecha, ubicacion, id_categoria, id_organizador } = req.body;
   try {
@@ -157,7 +138,7 @@ app.post('/api/evento', async (req, res) => {
   }
 });
 
-// 9. API del Dueño: Trae todos los usuarios registrados e identifica su nivel mediante LEFT JOIN
+// 9. API Dueño
 app.get('/api/owner/usuarios', async (req, res) => {
   try {
     const queryDueño = `
@@ -175,7 +156,7 @@ app.get('/api/owner/usuarios', async (req, res) => {
   }
 });
 
-// 10. Encender el servidor (Siempre al final)
+// 10. Escuchar puerto
 app.listen(PORT, () => {
   console.log(`🚀 Servidor de MANTRA corriendo en el puerto ${PORT}`);
 });
