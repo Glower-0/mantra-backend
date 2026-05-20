@@ -243,7 +243,145 @@ Cargando eventos...
 </div>
 
 </section>
+   <!-- MODAL RESEÑAS -->
 
+<div
+id="resenaModal"
+style="
+position:fixed;
+top:0;
+left:0;
+width:100%;
+height:100%;
+background:rgba(0,0,0,.75);
+display:none;
+justify-content:center;
+align-items:center;
+z-index:999;
+padding:20px;
+"
+>
+
+<div
+style="
+width:100%;
+max-width:650px;
+max-height:90vh;
+overflow:auto;
+background:#11111a;
+border-radius:30px;
+padding:30px;
+border:1px solid rgba(255,255,255,.08);
+"
+>
+
+<div
+style="
+display:flex;
+justify-content:space-between;
+align-items:center;
+margin-bottom:25px;
+"
+>
+
+<h2 id="modalTitulo">
+Reseñas
+</h2>
+
+<button
+onclick="cerrarResenas()"
+style="
+background:none;
+border:none;
+color:white;
+font-size:1.6rem;
+cursor:pointer;
+"
+>
+✕
+</button>
+
+</div>
+
+<div
+id="listaResenas"
+style="
+margin-bottom:25px;
+"
+>
+</div>
+
+<div
+style="
+border-top:1px solid rgba(255,255,255,.08);
+padding-top:25px;
+"
+>
+
+<h3
+style="
+margin-bottom:18px;
+"
+>
+Dejar reseña
+</h3>
+
+<select
+id="calificacion"
+style="
+width:100%;
+padding:14px;
+border:none;
+border-radius:14px;
+background:#1d1d29;
+color:white;
+margin-bottom:15px;
+"
+>
+<option value="5">⭐⭐⭐⭐⭐ 5</option>
+<option value="4">⭐⭐⭐⭐ 4</option>
+<option value="3">⭐⭐⭐ 3</option>
+<option value="2">⭐⭐ 2</option>
+<option value="1">⭐ 1</option>
+</select>
+
+<textarea
+id="comentario"
+placeholder="Escribe tu experiencia..."
+style="
+width:100%;
+height:120px;
+padding:15px;
+border:none;
+border-radius:16px;
+background:#1d1d29;
+color:white;
+resize:none;
+margin-bottom:15px;
+"
+></textarea>
+
+<button
+onclick="publicarResena()"
+style="
+width:100%;
+padding:15px;
+border:none;
+border-radius:16px;
+background:linear-gradient(135deg,#00bfff,#7c3aed);
+color:white;
+font-weight:700;
+cursor:pointer;
+"
+>
+Publicar reseña
+</button>
+
+</div>
+
+</div>
+
+</div>
 <script>
 
 /* ==========================
@@ -362,10 +500,29 @@ ${evento.titulo}
 </div>
 
 <button
+<div style="display:flex;gap:10px;margin-top:auto;">
+
+<button
 class="attend-btn"
 onclick="confirmarAsistencia(${evento.id_evento})"
+style="flex:1;"
 >
-Asistir al evento
+Asistir
+</button>
+
+<button
+class="attend-btn"
+onclick="abrirResenas(${evento.id_evento}, '${evento.titulo}')"
+style="
+flex:1;
+background:#1f1f2c;
+border:1px solid rgba(255,255,255,.08);
+"
+>
+⭐ Reseñas
+</button>
+
+</div>
 </button>
 
 </div>
@@ -471,7 +628,219 @@ window.location.href =
 'index.html';
 
 }
+/* ==========================
+   MODAL RESEÑAS
+========================== */
 
+let eventoActual = null;
+
+async function abrirResenas(
+idEvento,
+titulo
+){
+
+eventoActual = idEvento;
+
+document.getElementById(
+'modalTitulo'
+).innerText =
+`⭐ ${titulo}`;
+
+document.getElementById(
+'resenaModal'
+).style.display =
+'flex';
+
+cargarResenas(idEvento);
+
+}
+
+function cerrarResenas(){
+
+document.getElementById(
+'resenaModal'
+).style.display =
+'none';
+
+}
+
+/* ==========================
+   CARGAR RESEÑAS
+========================== */
+
+async function cargarResenas(
+idEvento
+){
+
+try{
+
+const response =
+await fetch(
+`/api/resenas/${idEvento}`
+);
+
+const resenas =
+await response.json();
+
+const lista =
+document.getElementById(
+'listaResenas'
+);
+
+lista.innerHTML = '';
+
+if(resenas.length === 0){
+
+lista.innerHTML =
+`
+<p style="color:#888;">
+Aún no hay reseñas.
+</p>
+`;
+
+return;
+
+}
+
+resenas.forEach(resena=>{
+
+const div =
+document.createElement('div');
+
+div.style =
+`
+background:#1a1a25;
+padding:18px;
+border-radius:18px;
+margin-bottom:15px;
+border:1px solid rgba(255,255,255,.05);
+`;
+
+div.innerHTML =
+`
+<div style="
+display:flex;
+justify-content:space-between;
+margin-bottom:10px;
+">
+
+<strong>
+${resena.nombre}
+</strong>
+
+<span style="color:#FFD700;">
+${'⭐'.repeat(resena.calificacion)}
+</span>
+
+</div>
+
+<p style="
+color:#ccc;
+margin-bottom:10px;
+">
+${resena.comentario}
+</p>
+
+<small style="color:#777;">
+${new Date(
+resena.fecha_publicacion
+).toLocaleDateString('es-MX')}
+</small>
+`;
+
+lista.appendChild(div);
+
+});
+
+}catch(error){
+
+console.error(error);
+
+}
+
+}
+
+/* ==========================
+   PUBLICAR RESEÑA
+========================== */
+
+async function publicarResena(){
+
+try{
+
+const calificacion =
+document.getElementById(
+'calificacion'
+).value;
+
+const comentario =
+document.getElementById(
+'comentario'
+).value;
+
+const response =
+await fetch(
+'/api/resenas',
+{
+
+method:'POST',
+
+headers:{
+'Content-Type':
+'application/json'
+},
+
+body:JSON.stringify({
+
+calificacion,
+comentario,
+
+id_evento:
+eventoActual,
+
+id_participante:
+usuario.id_usuario
+
+})
+
+}
+);
+
+const data =
+await response.json();
+
+if(!response.ok){
+
+alert(
+data.error ||
+'Error'
+);
+
+return;
+
+}
+
+document.getElementById(
+'comentario'
+).value = '';
+
+cargarResenas(eventoActual);
+
+alert(
+'⭐ Reseña publicada'
+);
+
+}catch(error){
+
+console.error(error);
+
+alert(
+'Error de conexión'
+);
+
+}
+
+}
 /* ==========================
    INIT
 ========================== */
