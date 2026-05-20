@@ -89,38 +89,77 @@ app.get('/', (req, res) => {
 });
 
 // 4. API Login
+// 4. API Login
 app.post('/api/login', async (req, res) => {
+
   const { email, password } = req.body;
+
   try {
+
     const userQuery = await pool.query(
-      'SELECT id_usuario, nombre, email FROM public.usuario WHERE email = $1 AND password = $2',
+      `
+      SELECT
+        id_usuario,
+        nombre,
+        email
+      FROM public.usuario
+      WHERE email = $1
+      AND password = $2
+      `,
       [email, password]
     );
 
     if (userQuery.rows.length === 0) {
-      return res.status(401).json({ error: 'Correo o contraseña incorrectos.' });
+      return res.status(401).json({
+        error: 'Correo o contraseña incorrectos.'
+      });
     }
 
     const usuario = userQuery.rows[0];
+
     let rol = 'asistidor';
 
+    // OWNER
     if (usuario.email === 'owner@mantra.com') {
+
       rol = 'owner';
+
     } else {
+
+      // ORGANIZADOR
       const orgQuery = await pool.query(
-        'SELECT id_usuario FROM public.organizador WHERE id_usuario = $1',
+        `
+        SELECT id_usuario
+        FROM public.organizador
+        WHERE id_usuario = $1
+        `,
         [usuario.id_usuario]
       );
-      if (orgQuery.rows.length > 0) rol = 'organizador';
+
+      if (orgQuery.rows.length > 0) {
+        rol = 'organizador';
+      }
     }
 
+    // RESPUESTA LOGIN
     res.json({
       success: true,
-      usuario: { id: usuario.id_usuario, nombre: usuario.nombre, email: usuario.email, rol: rol }
+
+      usuario: {
+        id_usuario: usuario.id_usuario,
+        nombre: usuario.nombre,
+        email: usuario.email,
+        rol: rol
+      }
     });
+
   } catch (err) {
+
     console.error(err.stack);
-    res.status(500).json({ error: 'Error interno del servidor.' });
+
+    res.status(500).json({
+      error: 'Error interno del servidor.'
+    });
   }
 });
 
