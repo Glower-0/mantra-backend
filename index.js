@@ -330,11 +330,12 @@ app.post('/api/register/organizador', async (req, res) => {
 ========================== */
 
 app.get('/api/feed', async (req, res) => {
-  const { id_usuario } = req.query;
 
   try {
-    const queryFeed = `
-      SELECT DISTINCT
+
+    const eventos = await pool.query(
+      `
+      SELECT
         e.id_evento,
         e.titulo,
         e.fecha,
@@ -342,31 +343,32 @@ app.get('/api/feed', async (req, res) => {
         e.calle,
         e.ciudad,
         e.imagen_url,
-        c.nombre_cat AS categoria_musical
+        c.nombre_cat
       FROM public.evento e
+
       LEFT JOIN public.evento_categoria ec
-        ON e.id_evento = ec.id_evento
+      ON e.id_evento = ec.id_evento
+
       LEFT JOIN public.categoria c
-        ON ec.id_categoria = c.id_categoria
-      LEFT JOIN public.preferencia p
-        ON p.id_categoria = c.id_categoria
-      WHERE p.id_participante = $1
-         OR $1 IS NULL
+      ON ec.id_categoria = c.id_categoria
+
       ORDER BY e.fecha ASC
-    `;
+      `
+    );
 
-    const resultado = await pool.query(queryFeed, [id_usuario]);
+    res.json(eventos.rows);
 
-    res.json(resultado.rows);
+  } catch (error) {
 
-  } catch (err) {
-    console.error(err.stack);
+    console.error(error);
+
     res.status(500).json({
-      error: 'Error al cargar el feed.'
+      error: 'Error cargando eventos'
     });
-  }
-});
 
+  }
+
+});
 /* ==========================
    ASISTENCIA
 ========================== */
