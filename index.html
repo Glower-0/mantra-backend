@@ -1,251 +1,443 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>MANTRA - Tu Red de Fiestas</title>
-    <style>
-        :root {
-            --bg-color: #0b0b0f;
-            --card-bg: #14141c;
-            --accent-color: #8b5cf6;
-            --accent-hover: #a78bfa;
-            --text-color: #f3f4f6;
-            --text-muted: #9ca3af;
-        }
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background-color: var(--bg-color);
-            color: var(--text-color);
-            margin: 0;
-            padding: 0;
-            display: flex;
-            flex-direction: column;
-            min-height: 100vh;
-        }
+<title>MANTRA | Eventos</title>
 
-        header {
-            background-color: rgba(20, 20, 28, 0.8);
-            backdrop-filter: blur(10px);
-            padding: 1rem 2rem;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            border-bottom: 1px solid #232330;
-            position: sticky;
-            top: 0;
-            z-index: 100;
-        }
-        .logo {
-            font-size: 1.8rem;
-            font-weight: bold;
-            letter-spacing: 2px;
-            background: linear-gradient(to right, #8b5cf6, #ec4899);
-            -webkit-background-clip: text;
-            background-clip: text; /* <--- Agrega esta línea para quitar la advertencia de VS Code */
-            -webkit-text-fill-color: transparent;
-        }   
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 
-        .nav-buttons .btn {
-            background-color: var(--accent-color);
-            color: white;
-            border: none;
-            padding: 0.6rem 1.2rem;
-            border-radius: 8px;
-            cursor: pointer;
-            font-weight: 600;
-            transition: background 0.2s;
-        }
+<style>
 
-        .nav-buttons .btn:hover {
-            background-color: var(--accent-hover);
-        }
+*{
+margin:0;
+padding:0;
+box-sizing:border-box;
+font-family:'Poppins',sans-serif;
+}
 
-        main {
-            flex: 1;
-            padding: 3rem 2rem;
-            max-width: 1200px;
-            margin: 0 auto;
-            text-align: center;
-        }
+body{
+background:
+linear-gradient(rgba(0,0,0,.75),rgba(0,0,0,.85)),
+url('https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?w=1920');
+background-size:cover;
+background-position:center;
+min-height:100vh;
+overflow-x:hidden;
+color:white;
+}
 
-        .hero h1 {
-            font-size: 3.5rem;
-            margin-bottom: 1rem;
-        }
+.navbar{
+display:flex;
+justify-content:space-between;
+align-items:center;
+padding:25px 8%;
+position:absolute;
+top:0;
+width:100%;
+z-index:100;
+}
 
-        .hero p {
-            color: var(--text-muted);
-            font-size: 1.2rem;
-            max-width: 600px;
-            margin: 0 auto 3rem auto;
-        }
+.logo{
+font-size:2rem;
+font-weight:700;
+color:#00BFFF;
+letter-spacing:2px;
+}
 
-        /* Estilos del Modal de Login */
-        .modal {
-            display: none;
-            position: fixed;
-            top: 0; left: 0; width: 100%; height: 100%;
-            background-color: rgba(0, 0, 0, 0.75);
-            backdrop-filter: blur(5px);
-            justify-content: center;
-            align-items: center;
-            z-index: 1000;
-        }
+.login-btn{
+padding:12px 28px;
+border:none;
+border-radius:50px;
+background:#00BFFF;
+color:white;
+font-weight:600;
+cursor:pointer;
+transition:.3s;
+}
 
-        .modal-content {
-            background-color: var(--card-bg);
-            padding: 2.5rem;
-            border-radius: 16px;
-            width: 100%;
-            max-width: 400px;
-            border: 1px solid #232330;
-            box-shadow: 0 10px 25px rgba(0,0,0,0.5);
-            position: relative;
-        }
+.login-btn:hover{
+transform:translateY(-3px);
+box-shadow:0 10px 30px rgba(0,191,255,.3);
+}
 
-        .close-btn {
-            position: absolute;
-            top: 15px; right: 20px;
-            font-size: 1.5rem;
-            cursor: pointer;
-            color: var(--text-muted);
-        }
+.hero{
+display:flex;
+flex-direction:column;
+justify-content:center;
+align-items:center;
+min-height:100vh;
+padding:100px 30px;
+text-align:center;
+}
 
-        .form-group {
-            margin-bottom: 1.5rem;
-            text-align: left;
-        }
+.hero h1{
+font-size:4rem;
+font-weight:700;
+max-width:900px;
+line-height:1.1;
+margin-bottom:20px;
+}
 
-        .form-group label {
-            display: block;
-            margin-bottom: 0.5rem;
-            color: var(--text-muted);
-        }
+.hero span{
+color:#00BFFF;
+}
 
-        .form-group input {
-            width: 100%;
-            padding: 0.8rem;
-            border-radius: 8px;
-            border: 1px solid #232330;
-            background-color: #0b0b0f;
-            color: white;
-            box-sizing: border-box;
-        }
+.hero p{
+font-size:1.2rem;
+color:#ddd;
+max-width:700px;
+margin-bottom:60px;
+}
 
-        .form-group input:focus {
-            border-color: var(--accent-color);
-            outline: none;
-        }
+.roles{
+display:flex;
+gap:40px;
+flex-wrap:wrap;
+justify-content:center;
+}
 
-        .submit-btn {
-            width: 100%;
-            background-color: var(--accent-color);
-            color: white;
-            border: none;
-            padding: 0.8rem;
-            border-radius: 8px;
-            font-weight: bold;
-            cursor: pointer;
-            font-size: 1rem;
-        }
+.card{
+width:360px;
+backdrop-filter:blur(20px);
+background:rgba(255,255,255,.08);
+border:1px solid rgba(255,255,255,.1);
+border-radius:30px;
+padding:40px;
+transition:.4s;
+box-shadow:0 10px 30px rgba(0,0,0,.3);
+}
 
-        .submit-btn:hover {
-            background-color: var(--accent-hover);
-        }
-    </style>
+.card:hover{
+transform:translateY(-10px);
+border:1px solid rgba(0,191,255,.4);
+}
+
+.card h2{
+font-size:2rem;
+margin-bottom:15px;
+}
+
+.card p{
+font-size:1rem;
+color:#ccc;
+margin-bottom:30px;
+}
+
+.card button{
+width:100%;
+padding:15px;
+border:none;
+border-radius:18px;
+background:#00BFFF;
+color:white;
+font-size:1rem;
+font-weight:600;
+cursor:pointer;
+transition:.3s;
+}
+
+.card button:hover{
+transform:scale(1.03);
+}
+
+.modal{
+position:fixed;
+top:0;
+left:0;
+width:100%;
+height:100%;
+background:rgba(0,0,0,.75);
+display:none;
+justify-content:center;
+align-items:center;
+z-index:999;
+}
+
+.modal-content{
+width:95%;
+max-width:450px;
+background:#101010;
+padding:35px;
+border-radius:30px;
+position:relative;
+animation:fade .3s ease;
+}
+
+@keyframes fade{
+from{
+opacity:0;
+transform:translateY(-20px);
+}
+to{
+opacity:1;
+transform:translateY(0);
+}
+}
+
+.close{
+position:absolute;
+top:20px;
+right:25px;
+font-size:1.8rem;
+cursor:pointer;
+}
+
+.modal-content h2{
+margin-bottom:20px;
+}
+
+.input-group{
+margin-bottom:20px;
+}
+
+.input-group input{
+width:100%;
+padding:16px;
+border:none;
+border-radius:14px;
+background:#1e1e1e;
+color:white;
+font-size:1rem;
+outline:none;
+}
+
+.submit-btn{
+width:100%;
+padding:16px;
+border:none;
+border-radius:16px;
+background:#00BFFF;
+font-size:1rem;
+font-weight:600;
+color:white;
+cursor:pointer;
+}
+
+.error{
+margin-top:15px;
+text-align:center;
+color:#ff4d4d;
+}
+
+@media(max-width:768px){
+
+.hero h1{
+font-size:2.6rem;
+}
+
+.roles{
+flex-direction:column;
+align-items:center;
+}
+
+.card{
+width:100%;
+max-width:360px;
+}
+
+}
+
+</style>
 </head>
+
 <body>
 
-    <header>
-        <div class="logo">MANTRA</div>
-        <div class="nav-buttons">
-            <button class="btn" onclick="openModal()">Iniciar Sesión</button>
-        </div>
-    </header>
+<nav class="navbar">
+<div class="logo">MANTRA</div>
+<button class="login-btn" onclick="openLogin()">
+Iniciar Sesión
+</button>
+</nav>
 
-    <main>
-        <div class="hero">
-            <h1>Descubre los mejores eventos</h1>
-            <p>Conéctate con organizadores, asiste a los raves más exclusivos y vive noches inolvidables en la CDMX.</p>
-        </div>
-    </main>
+<section class="hero">
 
-    <div id="loginModal" class="modal">
-        <div class="modal-content">
-            <span class="close-btn" onclick="closeModal()">&times;</span>
-            <h2 style="margin-top: 0; margin-bottom: 1.5rem;">Entrar a Mantra</h2>
-            
-            <div class="form-group">
-                <label for="userEmail">Correo Electrónico</label>
-                <input type="email" id="userEmail" placeholder="ejemplo@mantra.com">
-            </div>
+<h1>
+Encuentra eventos que conecten con tu
+<span>vibra</span>
+</h1>
 
-            <div class="form-group">
-                <label for="userPassword">Contraseña</label>
-                <input type="password" id="userPassword" placeholder="••••••••">
-            </div>
+<p>
+Descubre conciertos, festivales y experiencias
+personalizadas según tus gustos.
+O publica tus propios eventos y haz crecer tu comunidad.
+</p>
 
-            <button class="submit-btn" onclick="processLogin()">Ingresar Seguro</button>
-        </div>
-    </div>
+<div class="roles">
 
-    <script>
-        function openModal() {
-            document.getElementById('loginModal').style.display = 'flex';
-        }
+<div class="card">
+<h2>🎟 Asistidor</h2>
+<p>
+Explora eventos, recibe recomendaciones,
+califica experiencias y encuentra eventos
+según tus gustos.
+</p>
 
-        function closeModal() {
-            document.getElementById('loginModal').style.display = 'none';
-        }
+<button onclick="openRegister('asistidor')">
+Registrarme
+</button>
+</div>
 
-        async function processLogin() {
-            const emailInput = document.getElementById('userEmail').value;
-            const passwordInput = document.getElementById('userPassword').value;
+<div class="card">
+<h2>🎤 Organizador</h2>
+<p>
+Publica eventos, analiza estadísticas,
+crea tu comunidad y haz crecer tu alcance.
+</p>
 
-            if (!emailInput || !passwordInput) {
-                alert("Por favor, llena todos los campos.");
-                return;
-            }
+<button onclick="openRegister('organizador')">
+Registrarme
+</button>
+</div>
 
-            try {
-                // Petición directa a la API de tu index.js
-                const response = await fetch('/api/login', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify({ email: emailInput, password: passwordInput })
-                });
+</div>
 
-                const data = await response.json();
+</section>
 
-                if (!response.ok) {
-                    alert(data.error || "Error al iniciar sesión");
-                    return;
-                }
+<!-- LOGIN -->
+<div class="modal" id="loginModal">
 
-                alert(`¡Bienvenido a MANTRA, ${data.usuario.nombre}!`);
-                closeModal();
+<div class="modal-content">
 
-                // Guardar datos en la sesión del navegador
-                localStorage.setItem('usuarioMantra', JSON.stringify(data.usuario));
+<span class="close" onclick="closeModal()">
+×
+</span>
 
-                // Redirección inteligente según el rol que viene desde la BD en Render
-                if (data.usuario.role === 'owner' || data.usuario.rol === 'owner') {
-                    window.location.href = 'owner-dashboard.html';
-                } else if (data.usuario.role === 'organizador' || data.usuario.rol === 'organizador') {
-                    window.location.href = 'hugo-dashboard.html';
-                } else {
-                    window.location.href = 'feed-eventos.html';
-                }
+<h2>Iniciar Sesión</h2>
 
-            } catch (error) {
-                console.error("Error en la conexión:", error);
-                alert("No se pudo conectar con el servidor de Render.");
-            }
-        }
-    </script>
+<form id="loginForm">
+
+<div class="input-group">
+<input
+type="email"
+id="email"
+placeholder="Correo electrónico"
+required
+>
+</div>
+
+<div class="input-group">
+<input
+type="password"
+id="password"
+placeholder="Contraseña"
+required
+>
+</div>
+
+<button class="submit-btn" type="submit">
+Entrar
+</button>
+
+<p class="error" id="errorMsg"></p>
+
+</form>
+
+</div>
+</div>
+
+<script>
+
+function openLogin(){
+document.getElementById('loginModal').style.display='flex';
+}
+
+function closeModal(){
+document.getElementById('loginModal').style.display='none';
+}
+
+function openRegister(rol){
+
+if(rol === 'asistidor'){
+window.location.href='registro-asistidor.html';
+}else{
+window.location.href='registro-organizador.html';
+}
+
+}
+
+document
+.getElementById('loginForm')
+.addEventListener('submit', async(e)=>{
+
+e.preventDefault();
+
+const email =
+document.getElementById('email').value;
+
+const password =
+document.getElementById('password').value;
+
+const errorMsg =
+document.getElementById('errorMsg');
+
+try{
+
+const response = await fetch('/api/login',{
+
+method:'POST',
+
+headers:{
+'Content-Type':'application/json'
+},
+
+body:JSON.stringify({
+email,
+password
+})
+
+});
+
+const data = await response.json();
+
+if(!response.ok){
+
+errorMsg.innerText =
+data.error ||
+'Credenciales incorrectas';
+
+return;
+}
+
+localStorage.setItem(
+'usuarioMantra',
+JSON.stringify(data.usuario)
+);
+
+if(data.usuario.rol === 'owner'){
+
+window.location.href =
+'owner-dashboard.html';
+
+}else if(
+data.usuario.rol ===
+'organizador'
+){
+
+window.location.href =
+'hugo-dashboard.html';
+
+}else{
+
+window.location.href =
+'feed-eventos.html';
+
+}
+
+}catch(error){
+
+console.error(error);
+
+errorMsg.innerText =
+'Error de conexión';
+
+}
+
+});
+
+</script>
+
 </body>
 </html>
