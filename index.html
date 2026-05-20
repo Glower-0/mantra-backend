@@ -401,6 +401,31 @@ data.error ||
 return;
 }
 
+/* ======================
+GUARDAR SESIÓN
+====================== */
+
+localStorage.setItem(
+'usuarioMantra',
+JSON.stringify(data.usuario)
+);
+
+/* ======================
+REDIRECCIÓN POR ROL
+====================== */
+
+if(data.usuario.rol ===
+'organizador'){
+
+window.location.href =
+'dashboard-organizador.html';
+
+}else{
+
+window.location.href =
+'feed-eventos.html';
+
+}
 localStorage.setItem(
 'usuarioMantra',
 JSON.stringify(data.usuario)
