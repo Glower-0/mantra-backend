@@ -1,0 +1,271 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>Registro Asistidor | MANTRA</title>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+<style>
+
+*{
+margin:0;
+padding:0;
+box-sizing:border-box;
+font-family:'Poppins',sans-serif;
+}
+
+body{
+background:
+linear-gradient(rgba(0,0,0,.75),rgba(0,0,0,.85)),
+url('https://images.unsplash.com/photo-1501386761578-eac5c94b800?w=1920');
+background-size:cover;
+background-position:center;
+min-height:100vh;
+display:flex;
+justify-content:center;
+align-items:center;
+padding:30px;
+}
+
+.container{
+width:100%;
+max-width:600px;
+background:rgba(255,255,255,.08);
+backdrop-filter:blur(20px);
+border:1px solid rgba(255,255,255,.1);
+border-radius:30px;
+padding:40px;
+color:white;
+box-shadow:0 15px 40px rgba(0,0,0,.3);
+}
+
+h1{
+text-align:center;
+margin-bottom:10px;
+font-size:2.2rem;
+}
+
+.subtitle{
+text-align:center;
+margin-bottom:30px;
+color:#ccc;
+}
+
+.input-group{
+margin-bottom:20px;
+}
+
+label{
+display:block;
+margin-bottom:8px;
+font-size:.95rem;
+}
+
+input,
+textarea{
+width:100%;
+padding:15px;
+border:none;
+border-radius:16px;
+background:#1d1d1d;
+color:white;
+font-size:1rem;
+outline:none;
+}
+
+textarea{
+resize:none;
+height:100px;
+}
+
+button{
+width:100%;
+padding:16px;
+border:none;
+border-radius:16px;
+background:#00BFFF;
+color:white;
+font-size:1rem;
+font-weight:600;
+cursor:pointer;
+transition:.3s;
+}
+
+button:hover{
+transform:translateY(-2px);
+}
+
+.message{
+margin-top:20px;
+text-align:center;
+font-weight:500;
+}
+
+.back{
+display:block;
+text-align:center;
+margin-top:20px;
+color:#ccc;
+text-decoration:none;
+}
+
+</style>
+</head>
+<body>
+
+<div class="container">
+
+<h1>🎟 Crear cuenta</h1>
+
+<p class="subtitle">
+Encuentra eventos personalizados para ti
+</p>
+
+<form id="registroForm">
+
+<div class="input-group">
+<label>Nombre completo</label>
+<input type="text" id="nombre" required>
+</div>
+
+<div class="input-group">
+<label>Correo electrónico</label>
+<input type="email" id="email" required>
+</div>
+
+<div class="input-group">
+<label>Contraseña</label>
+<input type="password" id="password" required>
+</div>
+
+<div class="input-group">
+<label>Edad</label>
+<input type="number" id="edad" required>
+</div>
+
+<div class="input-group">
+<label>Biografía</label>
+<textarea id="biografia"></textarea>
+</div>
+
+<div class="input-group">
+<label>Intereses musicales</label>
+<input
+type="text"
+id="intereses"
+placeholder="Ej: Rock, Techno, Pop"
+required
+>
+</div>
+
+<button type="submit">
+Crear cuenta
+</button>
+
+<div class="message" id="message"></div>
+
+</form>
+
+<a href="index.html" class="back">
+← Volver al inicio
+</a>
+
+</div>
+
+<script>
+
+document
+.getElementById('registroForm')
+.addEventListener('submit', async(e)=>{
+
+e.preventDefault();
+
+const data = {
+
+nombre:
+document.getElementById('nombre').value,
+
+email:
+document.getElementById('email').value,
+
+password:
+document.getElementById('password').value,
+
+edad:
+document.getElementById('edad').value,
+
+biografia:
+document.getElementById('biografia').value,
+
+intereses:
+document.getElementById('intereses').value
+
+};
+
+const message =
+document.getElementById('message');
+
+try{
+
+const response = await fetch(
+'/api/register/asistidor',
+{
+method:'POST',
+
+headers:{
+'Content-Type':'application/json'
+},
+
+body:JSON.stringify(data)
+}
+);
+
+const result =
+await response.json();
+
+if(!response.ok){
+
+message.style.color =
+'#ff5a5a';
+
+message.innerText =
+result.error;
+
+return;
+}
+
+message.style.color =
+'#00ff99';
+
+message.innerText =
+'Cuenta creada correctamente 🎉';
+
+setTimeout(()=>{
+
+window.location.href =
+'index.html';
+
+},1500);
+
+}catch(error){
+
+console.error(error);
+
+message.style.color =
+'#ff5a5a';
+
+message.innerText =
+'Error de conexión';
+
+}
+
+});
+
+</script>
+
+</body>
+</html>
