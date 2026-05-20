@@ -219,7 +219,7 @@
                             <h3>${evt.titulo}</h3>
                             <div class="event-info">
                                 <span><i class="fa-solid fa-calendar-days"></i> ${new Date(evt.fecha).toLocaleDateString()}</span>
-                                <span><i class="fa-solid fa-location-dot"></i> ${evt.ubicacion}</span>
+                                <span><i class="fa-solid fa-location-dot"></i> ${{evt.calle}, ${evt.ciudad}}</span>
                             </div>
                             <span class="event-category">${evt.categoria_musical}</span>
                         </div>
