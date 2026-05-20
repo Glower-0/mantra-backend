@@ -1,3 +1,5 @@
+ALTER TABLE public.evento
+ADD COLUMN imagen_url TEXT;
 const express = require('express');
 const { Pool } = require('pg');
 const path = require('path');
@@ -10,6 +12,60 @@ const PORT = process.env.PORT || 3000;
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(express.static(path.join(__dirname)));
+/* ==========================
+   CONFIGURACIÓN IMÁGENES
+========================== */
+
+app.use('/uploads', express.static('uploads'));
+
+const storage = multer.diskStorage({
+
+    destination: function(req, file, cb){
+
+        cb(null, 'uploads/');
+    },
+
+    filename: function(req, file, cb){
+
+        const uniqueName =
+        Date.now() +
+        path.extname(file.originalname);
+
+        cb(null, uniqueName);
+    }
+});
+
+const upload = multer({
+
+    storage: storage,
+
+    limits:{
+        fileSize: 5 * 1024 * 1024
+    },
+
+    fileFilter:(req,file,cb)=>{
+
+        const allowed =
+        /jpg|jpeg|png|webp/;
+
+        const ext =
+        allowed.test(
+            path.extname(file.originalname)
+            .toLowerCase()
+        );
+
+        if(ext){
+            return cb(null,true);
+        }
+
+        cb(
+            new Error(
+                'Solo imágenes JPG PNG WEBP'
+            )
+        );
+    }
+
+});
 
 // 2. Configuración de conexión a PostgreSQL usando la variable de entorno
 const pool = new Pool({
@@ -353,4 +409,87 @@ app.get('/api/owner/usuarios', async (req, res) => {
 // 10. Escuchar puerto
 app.listen(PORT, () => {
   console.log(`🚀 Servidor de MANTRA corriendo en el puerto ${PORT}`);
+});
+/* ==========================
+   CREAR EVENTO
+========================== */
+
+app.post(
+'/api/eventos/crear',
+upload.single('imagen'),
+async(req,res)=>{
+
+try{
+
+const {
+titulo,
+fecha,
+hora,
+calle,
+ciudad,
+idOrganizador
+}
+= req.body;
+
+const imagen_url =
+req.file
+? `/uploads/${req.file.filename}`
+: null;
+
+const nextId =
+await pool.query(`
+SELECT
+COALESCE(MAX(id_evento),0)+1
+AS id
+FROM public.evento
+`);
+
+const idEvento =
+nextId.rows[0].id;
+
+await pool.query(
+`
+INSERT INTO public.evento
+(
+id_evento,
+titulo,
+fecha,
+hora,
+calle,
+ciudad,
+imagen_url,
+id_organizador
+)
+VALUES
+($1,$2,$3,$4,$5,$6,$7,$8)
+`,
+[
+idEvento,
+titulo,
+fecha,
+hora,
+calle,
+ciudad,
+imagen_url,
+idOrganizador
+]
+);
+
+res.json({
+success:true,
+message:
+'Evento publicado'
+});
+
+}catch(error){
+
+console.error(error);
+
+res.status(500).json({
+error:
+'Error creando evento'
+});
+
+}
+
 });
