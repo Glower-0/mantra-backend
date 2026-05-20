@@ -206,14 +206,26 @@ grid-template-columns:1fr;
 <div class="logo">
 MANTRA
 </div>
-
 <div class="user-box">
 
 <span id="userName">
 Usuario
 </span>
 
-<button class="logout" onclick="logout()">
+<button
+class="logout"
+style="
+background:#1d1d29;
+"
+onclick="window.location.href='perfil.html'"
+>
+Mi perfil
+</button>
+
+<button
+class="logout"
+onclick="logout()"
+>
 Cerrar sesión
 </button>
 
