@@ -970,6 +970,29 @@ app.get('/api/perfil/:id/actividad', async (req, res) => {
   }
 });
 });
+
+app.put('/api/perfil/:id', async (req, res) => {
+  const idUsuario = req.params.id;
+  const { biografia, intereses } = req.body;
+
+  try {
+    await pool.query(
+      `UPDATE public.usuario SET biografia = $1 WHERE id_usuario = $2`,
+      [biografia, idUsuario]
+    );
+
+    await pool.query(
+      `UPDATE public.participante SET intereses = $1 WHERE id_usuario = $2`,
+      [intereses, idUsuario]
+    );
+
+    res.json({ success: true, message: 'Perfil actualizado' });
+
+  } catch (error) {
+    console.error('ERROR EDITAR PERFIL:', error);
+    res.status(500).json({ error: 'Error actualizando perfil' });
+  }
+});
 /* ==========================
    SERVER
 ========================== */
