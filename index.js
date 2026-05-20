@@ -11,11 +11,11 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(express.static(path.join(__dirname)));
 
-// 2. Conexión segura a PostgreSQL en Render
+// 2. Configuración de conexión a PostgreSQL usando la variable de entorno
 const pool = new Pool({
-  connectionString: process.env.DATABASE_URL,
+  connectionString: process.env.DATABASE_URL, // Render leerá la variable que acabas de configurar
   ssl: {
-    rejectUnauthorized: false
+    rejectUnauthorized: false // Necesario para la conexión segura en la nube
   }
 });
 
