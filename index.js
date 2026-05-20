@@ -87,7 +87,201 @@ app.get('/api/feed', async (req, res) => {
     res.status(500).json({ error: 'Error al cargar el feed' });
   }
 });
+/* ==========================
+   REGISTRO ASISTIDOR
+========================== */
 
+app.post('/api/register/asistidor', async (req, res) => {
+
+    const {
+        nombre,
+        email,
+        password,
+        edad,
+        biografia,
+        intereses
+    } = req.body;
+
+    try {
+
+        // verificar email existente
+        const existe = await pool.query(
+            `
+            SELECT email
+            FROM public.usuario
+            WHERE email = $1
+            `,
+            [email]
+        );
+
+        if (existe.rows.length > 0) {
+            return res.status(400).json({
+                error: 'Este correo ya está registrado.'
+            });
+        }
+
+        // obtener nuevo id
+        const nextId = await pool.query(
+            `
+            SELECT COALESCE(MAX(id_usuario),0)+1 AS id
+            FROM public.usuario
+            `
+        );
+
+        const idUsuario = nextId.rows[0].id;
+
+        // guardar usuario
+        await pool.query(
+            `
+            INSERT INTO public.usuario
+            (
+                id_usuario,
+                nombre,
+                email,
+                password,
+                edad,
+                biografia
+            )
+            VALUES ($1,$2,$3,$4,$5,$6)
+            `,
+            [
+                idUsuario,
+                nombre,
+                email,
+                password,
+                edad,
+                biografia
+            ]
+        );
+
+        // guardar participante
+        await pool.query(
+            `
+            INSERT INTO public.participante
+            (
+                id_usuario,
+                intereses
+            )
+            VALUES ($1,$2)
+            `,
+            [
+                idUsuario,
+                intereses
+            ]
+        );
+
+        res.json({
+            success: true,
+            message: 'Cuenta creada correctamente'
+        });
+
+    } catch (error) {
+
+        console.error(error);
+
+        res.status(500).json({
+            error: 'Error registrando asistidor'
+        });
+    }
+});
+
+
+/* ==========================
+   REGISTRO ORGANIZADOR
+========================== */
+
+app.post('/api/register/organizador', async (req, res) => {
+
+    const {
+        nombre,
+        email,
+        password,
+        edad,
+        biografia
+    } = req.body;
+
+    try {
+
+        // verificar correo
+        const existe = await pool.query(
+            `
+            SELECT email
+            FROM public.usuario
+            WHERE email = $1
+            `,
+            [email]
+        );
+
+        if (existe.rows.length > 0) {
+            return res.status(400).json({
+                error: 'Correo ya registrado'
+            });
+        }
+
+        // nuevo id
+        const nextId = await pool.query(
+            `
+            SELECT COALESCE(MAX(id_usuario),0)+1 AS id
+            FROM public.usuario
+            `
+        );
+
+        const idUsuario = nextId.rows[0].id;
+
+        // guardar usuario
+        await pool.query(
+            `
+            INSERT INTO public.usuario
+            (
+                id_usuario,
+                nombre,
+                email,
+                password,
+                edad,
+                biografia
+            )
+            VALUES ($1,$2,$3,$4,$5,$6)
+            `,
+            [
+                idUsuario,
+                nombre,
+                email,
+                password,
+                edad,
+                biografia
+            ]
+        );
+
+        // guardar organizador
+        await pool.query(
+            `
+            INSERT INTO public.organizador
+            (
+                id_usuario,
+                reputacion
+            )
+            VALUES ($1,$2)
+            `,
+            [
+                idUsuario,
+                0.00
+            ]
+        );
+
+        res.json({
+            success: true,
+            message: 'Organizador registrado'
+        });
+
+    } catch (error) {
+
+        console.error(error);
+
+        res.status(500).json({
+            error: 'Error registrando organizador'
+        });
+    }
+});
 // 6. API Asistencia
 app.post('/api/asistencia', async (req, res) => {
   const { id_usuario, id_evento } = req.body;
