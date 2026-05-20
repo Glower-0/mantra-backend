@@ -875,7 +875,100 @@ error:
 });
 
 }
+/* ==========================
+   EDITAR PERFIL
+========================== */
 
+app.put('/api/perfil/:id', async (req, res) => {
+  const idUsuario = req.params.id;
+  const { biografia, intereses } = req.body;
+
+  try {
+    await pool.query(
+      `
+      UPDATE public.usuario
+      SET biografia = $1
+      WHERE id_usuario = $2
+      `,
+      [biografia, idUsuario]
+    );
+
+    await pool.query(
+      `
+      UPDATE public.participante
+      SET intereses = $1
+      WHERE id_usuario = $2
+      `,
+      [intereses, idUsuario]
+    );
+
+    res.json({
+      success: true,
+      message: 'Perfil actualizado'
+    });
+
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({
+      error: 'Error actualizando perfil'
+    });
+  }
+});
+
+/* ==========================
+   ACTIVIDAD RECIENTE PERFIL
+========================== */
+
+app.get('/api/perfil/:id/actividad', async (req, res) => {
+  const idUsuario = req.params.id;
+
+  try {
+    const eventos = await pool.query(
+      `
+      SELECT
+        e.titulo,
+        e.fecha,
+        e.ciudad,
+        e.imagen_url
+      FROM public.asistencia a
+      JOIN public.evento e
+        ON a.id_evento = e.id_evento
+      WHERE a.id_participante = $1
+      ORDER BY e.fecha DESC
+      LIMIT 6
+      `,
+      [idUsuario]
+    );
+
+    const resenas = await pool.query(
+      `
+      SELECT
+        r.calificacion,
+        r.comentario,
+        r.fecha_publicacion,
+        e.titulo
+      FROM public.resena r
+      JOIN public.evento e
+        ON r.id_evento = e.id_evento
+      WHERE r.id_participante = $1
+      ORDER BY r.fecha_publicacion DESC
+      LIMIT 6
+      `,
+      [idUsuario]
+    );
+
+    res.json({
+      eventos: eventos.rows,
+      resenas: resenas.rows
+    });
+
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({
+      error: 'Error cargando actividad'
+    });
+  }
+});
 });
 /* ==========================
    SERVER
