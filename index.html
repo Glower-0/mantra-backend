@@ -395,10 +395,35 @@ const data = await response.json();
 if(!response.ok){
 
 errorMsg.innerText =
-data.error ||
-'Credenciales incorrectas';
+data.error;
 
 return;
+}
+
+// GUARDAR USUARIO
+localStorage.setItem(
+'usuarioMantra',
+JSON.stringify(data.usuario)
+);
+
+// REDIRECCIÓN
+if(data.usuario.rol === 'owner'){
+
+window.location.href =
+'owner-dashboard.html';
+
+}else if(
+data.usuario.rol === 'organizador'
+){
+
+window.location.href =
+'dashboard-organizador.html';
+
+}else{
+
+window.location.href =
+'feed-eventos.html';
+
 }
 
 /* ======================
