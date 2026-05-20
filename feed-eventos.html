@@ -1,267 +1,484 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>MANTRA | Tu Muro de Fiestas</title>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/js/all.min.js"></script>
-    <style>
-        :root {
-            --primary: #00d2ff; 
-            --accent: #7000ff;
-            --bg-dark: #0a0a0c;
-            --card-bg: #16161a;
-            --text-main: #ffffff;
-            --text-dim: #a0a0a0;
-        }
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-        body {
-            font-family: 'Inter', sans-serif;
-            background-color: var(--bg-dark);
-            color: var(--text-main);
-            margin: 0;
-            padding: 0;
-        }
+<title>MANTRA | Feed Eventos</title>
 
-        /* Navbar del Muro */
-        .navbar {
-            background-color: rgba(22, 22, 26, 0.95);
-            padding: 1rem 2rem;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            border-bottom: 1px solid #222228;
-            position: sticky;
-            top: 0;
-            z-index: 100;
-        }
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
 
-        .logo {
-            font-size: 1.5rem;
-            font-weight: bold;
-            letter-spacing: 2px;
-            background: linear-gradient(45deg, var(--primary), var(--accent));
-            -webkit-background-clip: text;
-            background-clip: text; /* <--- Agrega esta línea exacta y desaparecerá la ondita */
-            -webkit-text-fill-color: transparent;
-        }
+<style>
 
-        .user-welcome {
-            display: flex;
-            align-items: center;
-            gap: 15px;
-        }
+*{
+margin:0;
+padding:0;
+box-sizing:border-box;
+font-family:'Poppins',sans-serif;
+}
 
-        .btn-logout {
-            background: none;
-            border: 1px solid #ff4a4a;
-            color: #ff4a4a;
-            padding: 0.5rem 1rem;
-            border-radius: 6px;
-            cursor: pointer;
-            font-weight: 600;
-            transition: all 0.2s;
-        }
+body{
+background:#07070a;
+color:white;
+min-height:100vh;
+}
 
-        .btn-logout:hover {
-            background-color: #ff4a4a;
-            color: white;
-        }
+/* NAVBAR */
 
-        /* Contenedor del Feed */
-        .feed-container {
-            max-width: 900px;
-            margin: 2rem auto;
-            padding: 0 1rem;
-        }
+.navbar{
+display:flex;
+justify-content:space-between;
+align-items:center;
+padding:22px 7%;
+background:rgba(12,12,18,.95);
+border-bottom:1px solid rgba(255,255,255,.08);
+position:sticky;
+top:0;
+z-index:10;
+}
 
-        .feed-header {
-            margin-bottom: 2rem;
-            border-left: 4px solid var(--primary);
-            padding-left: 15px;
-        }
+.logo{
+font-size:1.9rem;
+font-weight:800;
+letter-spacing:2px;
+color:#00bfff;
+}
 
-        .feed-header h1 {
-            margin: 0;
-            font-size: 2rem;
-        }
+.user-box{
+display:flex;
+align-items:center;
+gap:15px;
+}
 
-        .feed-header p {
-            color: var(--text-dim);
-            margin: 5px 0 0 0;
-        }
+.logout{
+padding:10px 18px;
+border:none;
+border-radius:14px;
+background:#ff4d4d;
+color:white;
+font-weight:600;
+cursor:pointer;
+}
 
-        /* Tarjetas de Eventos */
-        .events-grid {
-            display: flex;
-            flex-direction: column;
-            gap: 1.5rem;
-        }
+/* HERO */
 
-        .event-card {
-            background-color: var(--card-bg);
-            border: 1px solid #222228;
-            border-radius: 12px;
-            padding: 1.5rem;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            transition: transform 0.2s;
-        }
+.hero{
+padding:60px 7% 30px;
+}
 
-        .event-card:hover {
-            transform: translateY(-2px);
-            border-color: var(--primary);
-        }
+.hero h1{
+font-size:3rem;
+margin-bottom:12px;
+}
 
-        .event-details h3 {
-            margin: 0 0 0.5rem 0;
-            font-size: 1.4rem;
-            color: var(--primary);
-        }
+.hero p{
+color:#aaa;
+font-size:1.05rem;
+}
 
-        .event-info {
-            display: flex;
-            gap: 15px;
-            color: var(--text-dim);
-            font-size: 0.9rem;
-            margin-bottom: 0.5rem;
-        }
+/* GRID */
 
-        .event-info i {
-            color: var(--accent);
-        }
+.events-grid{
+padding:20px 7% 60px;
+display:grid;
+grid-template-columns:
+repeat(auto-fill,minmax(320px,1fr));
+gap:28px;
+}
 
-        .event-category {
-            display: inline-block;
-            background: rgba(112, 0, 255, 0.2);
-            color: #bfa3ff;
-            padding: 0.2rem 0.6rem;
-            border-radius: 20px;
-            font-size: 0.8rem;
-            font-weight: bold;
-        }
+/* CARD */
 
-        .btn-asistir {
-            background: linear-gradient(45deg, var(--primary), var(--accent));
-            color: white;
-            border: none;
-            padding: 0.8rem 1.5rem;
-            border-radius: 8px;
-            font-weight: bold;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            transition: opacity 0.2s;
-        }
+.event-card{
+background:#12121a;
+border:1px solid rgba(255,255,255,.08);
+border-radius:28px;
+overflow:hidden;
+transition:.35s;
+display:flex;
+flex-direction:column;
+}
 
-        .btn-asistir:hover {
-            opacity: 0.9;
-        }
-    </style>
+.event-card:hover{
+transform:translateY(-7px);
+border-color:#00bfff;
+}
+
+.event-image{
+height:220px;
+background:#1c1c26;
+display:flex;
+justify-content:center;
+align-items:center;
+overflow:hidden;
+}
+
+.event-image img{
+width:100%;
+height:100%;
+object-fit:cover;
+}
+
+.no-image{
+color:#777;
+font-size:.95rem;
+}
+
+.event-content{
+padding:24px;
+display:flex;
+flex-direction:column;
+flex:1;
+}
+
+.category{
+display:inline-block;
+padding:8px 14px;
+background:rgba(0,191,255,.15);
+border:1px solid rgba(0,191,255,.3);
+border-radius:50px;
+font-size:.82rem;
+margin-bottom:14px;
+color:#00bfff;
+width:max-content;
+}
+
+.event-title{
+font-size:1.45rem;
+font-weight:700;
+margin-bottom:15px;
+}
+
+.event-info{
+color:#aaa;
+font-size:.95rem;
+margin-bottom:10px;
+}
+
+.attend-btn{
+margin-top:auto;
+padding:15px;
+border:none;
+border-radius:18px;
+background:linear-gradient(135deg,#00bfff,#7c3aed);
+color:white;
+font-weight:700;
+font-size:1rem;
+cursor:pointer;
+transition:.3s;
+}
+
+.attend-btn:hover{
+transform:translateY(-2px);
+}
+
+.loading{
+padding:40px;
+text-align:center;
+color:#888;
+font-size:1.1rem;
+}
+
+.empty{
+padding:40px;
+text-align:center;
+color:#888;
+}
+
+@media(max-width:768px){
+
+.hero h1{
+font-size:2.2rem;
+}
+
+.events-grid{
+grid-template-columns:1fr;
+}
+
+}
+
+</style>
 </head>
+
 <body>
 
-    <nav class="navbar">
-        <div class="logo">MANTRA</div>
-        <div class="user-welcome">
-            <span id="userNameTxt">Cargando asistente...</span>
-            <button class="btn-logout" onclick="logout()">Cerrar Sesión</button>
-        </div>
-    </nav>
+<nav class="navbar">
 
-    <main class="feed-container">
-        <div class="feed-header">
-            <h1>Tu Cartelera Personalizada</h1>
-            <p id="matchTxt">Buscando las fiestas que hacen match con tus gustos...</p>
-        </div>
+<div class="logo">
+MANTRA
+</div>
 
-        <div class="events-grid" id="eventsGrid">
-            <p style="color: var(--text-dim);">Cargando eventos exclusivos para ti...</p>
-        </div>
-    </main>
+<div class="user-box">
 
-    <script>
-        // 1. Validar que el usuario inició sesión de verdad
-        const usuarioSesion = JSON.parse(localStorage.getItem('usuarioMantra'));
+<span id="userName">
+Usuario
+</span>
 
-        if (!usuarioSesion) {
-            alert("No has iniciado sesión. Volviendo al inicio.");
-            window.location.href = 'index.html';
-        } else {
-            document.getElementById('userNameTxt').innerText = `👋 ¡Hola, ${usuarioSesion.nombre}!`;
-        }
+<button class="logout" onclick="logout()">
+Cerrar sesión
+</button>
 
-        // 2. Cargar los eventos personalizados desde el backend al abrir la página
-        async function cargarFeed() {
-            try {
-                // Le pasamos el ID del usuario al backend para que sepa qué música le gusta
-                const response = await fetch(`/api/feed?id_usuario=${usuarioSesion.id}`);
-                const eventos = await response.json();
+</div>
 
-                const grid = document.getElementById('eventsGrid');
-                grid.innerHTML = ''; // Limpiar mensaje de carga
+</nav>
 
-                if (eventos.length === 0) {
-                    grid.innerHTML = `<p style="color: var(--text-dim);">No hay eventos disponibles que coincidan con tus preferencias musicales en este momento.</p>`;
-                    return;
-                }
+<section class="hero">
 
-                document.getElementById('matchTxt').innerText = `Encontramos ${eventos.length} fiestas ideales para ti en la CDMX:`;
+<h1>
+Descubre eventos increíbles 🔥
+</h1>
 
-                // Renderizar cada fila de la base de datos en una tarjeta HTML
-                eventos.forEach(evt => {
-                    const card = document.createElement('div');
-                    card.className = 'event-card';
-                    card.innerHTML = `
-                        <div class="event-details">
-                            <h3>${evt.titulo}</h3>
-                            <div class="event-info">
-                                <span><i class="fa-solid fa-calendar-days"></i> ${new Date(evt.fecha).toLocaleDateString()}</span>
-                                <span><i class="fa-solid fa-location-dot"></i> ${{evt.calle}, ${evt.ciudad}}</span>
-                            </div>
-                            <span class="event-category">${evt.categoria_musical}</span>
-                        </div>
-                        <button class="btn-asistir" onclick="confirmarAsistencia(${evt.id_evento})">
-                            <i class="fa-solid fa-ticket"></i> Asistiré
-                        </button>
-                    `;
-                    grid.appendChild(card);
-                });
+<p>
+Eventos personalizados según tus gustos y recomendaciones.
+</p>
 
-            } catch (error) {
-                console.error("Error al cargar el feed:", error);
-                document.getElementById('eventsGrid').innerHTML = `<p style="color: #ff4a4a;">Error al conectar con la base de datos de Render.</p>`;
-            }
-        }
+</section>
 
-        // 3. Botón de confirmar asistencia (Manda los datos directos a la tabla asistencia)
-        async function confirmarAsistencia(idEvento) {
-            try {
-                const response = await fetch('/api/asistencia', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ id_usuario: usuarioSesion.id, id_evento: idEvento })
-                });
+<section
+class="events-grid"
+id="eventsGrid"
+>
 
-                if (response.ok) {
-                    alert("¡Asistencia confirmada! Tu lugar está reservado.");
-                } else {
-                    alert("Ya estás registrado en este evento.");
-                }
-            } catch (error) {
-                alert("Error al procesar la asistencia.");
-            }
-        }
+<div class="loading">
+Cargando eventos...
+</div>
 
-        function logout() {
-            localStorage.removeItem('usuarioMantra');
-            window.location.href = 'index.html';
-        }
+</section>
 
-        // Arrancar la carga automáticamente
-        cargarFeed();
-    </script>
+<script>
+
+/* ==========================
+   VALIDAR SESIÓN
+========================== */
+
+const usuario =
+JSON.parse(
+localStorage.getItem(
+'usuarioMantra'
+)
+);
+
+if(!usuario){
+
+window.location.href =
+'index.html';
+
+}
+
+document.getElementById(
+'userName'
+).innerText =
+usuario.nombre;
+
+/* ==========================
+   CARGAR EVENTOS
+========================== */
+
+async function cargarEventos(){
+
+try{
+
+const response =
+await fetch('/api/feed');
+
+const eventos =
+await response.json();
+
+const grid =
+document.getElementById(
+'eventsGrid'
+);
+
+grid.innerHTML = '';
+
+if(eventos.length === 0){
+
+grid.innerHTML =
+`
+<div class="empty">
+No hay eventos disponibles.
+</div>
+`;
+
+return;
+
+}
+
+eventos.forEach(evento=>{
+
+const card =
+document.createElement('div');
+
+card.className =
+'event-card';
+
+const fecha =
+evento.fecha
+? new Date(evento.fecha)
+.toLocaleDateString(
+'es-MX'
+)
+: 'Sin fecha';
+
+card.innerHTML =
+`
+<div class="event-image">
+
+${
+evento.imagen_url
+
+? `<img src="${evento.imagen_url}" alt="${evento.titulo}">`
+
+: `<div class="no-image">
+Sin promocional
+</div>`
+}
+
+</div>
+
+<div class="event-content">
+
+<div class="category">
+${evento.nombre_cat || 'General'}
+</div>
+
+<div class="event-title">
+${evento.titulo}
+</div>
+
+<div class="event-info">
+📅 ${fecha}
+</div>
+
+<div class="event-info">
+🕒 ${evento.hora || ''}
+</div>
+
+<div class="event-info">
+📍 ${evento.calle || ''}
+</div>
+
+<div class="event-info">
+🌎 ${evento.ciudad || ''}
+</div>
+
+<button
+class="attend-btn"
+onclick="confirmarAsistencia(${evento.id_evento})"
+>
+Asistir al evento
+</button>
+
+</div>
+`;
+
+grid.appendChild(card);
+
+});
+
+}catch(error){
+
+console.error(error);
+
+document.getElementById(
+'eventsGrid'
+).innerHTML =
+`
+<div class="empty">
+Error cargando eventos.
+</div>
+`;
+
+}
+
+}
+
+/* ==========================
+   ASISTENCIA
+========================== */
+
+async function confirmarAsistencia(
+idEvento
+){
+
+try{
+
+const response =
+await fetch(
+'/api/asistencia',
+{
+
+method:'POST',
+
+headers:{
+'Content-Type':
+'application/json'
+},
+
+body:JSON.stringify({
+
+id_usuario:
+usuario.id_usuario,
+
+id_evento:
+idEvento
+
+})
+
+}
+);
+
+const data =
+await response.json();
+
+if(!response.ok){
+
+alert(
+data.error ||
+'Error'
+);
+
+return;
+
+}
+
+alert(
+'🎉 Asistencia confirmada'
+);
+
+}catch(error){
+
+console.error(error);
+
+alert(
+'Error de conexión'
+);
+
+}
+
+}
+
+/* ==========================
+   LOGOUT
+========================== */
+
+function logout(){
+
+localStorage.removeItem(
+'usuarioMantra'
+);
+
+window.location.href =
+'index.html';
+
+}
+
+/* ==========================
+   INIT
+========================== */
+
+cargarEventos();
+
+</script>
+
 </body>
 </html>
