@@ -1,77 +1,251 @@
-<style>
-    .auth-tabs { display: flex; gap: 10px; margin-bottom: 20px; border-bottom: 1px solid #232330; }
-    .tab { padding: 10px; cursor: pointer; color: var(--text-muted); font-weight: bold; }
-    .tab.active { color: var(--accent-color); border-bottom: 2px solid var(--accent-color); }
-    .form-container { display: none; }
-    .form-container.active { display: block; }
-</style>
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MANTRA - Tu Red de Fiestas</title>
+    <style>
+        :root {
+            --bg-color: #0b0b0f;
+            --card-bg: #14141c;
+            --accent-color: #8b5cf6;
+            --accent-hover: #a78bfa;
+            --text-color: #f3f4f6;
+            --text-muted: #9ca3af;
+        }
 
-<div id="loginModal" class="modal">
-    <div class="modal-content">
-        <span class="close-btn" onclick="closeModal()">&times;</span>
-        
-        <div class="auth-tabs">
-            <div class="tab active" onclick="showForm('login')">Ingresar</div>
-            <div class="tab" onclick="showForm('register')">Registrarse</div>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+        }
+
+        header {
+            background-color: rgba(20, 20, 28, 0.8);
+            backdrop-filter: blur(10px);
+            padding: 1rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid #232330;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+        .logo {
+            font-size: 1.8rem;
+            font-weight: bold;
+            letter-spacing: 2px;
+            background: linear-gradient(to right, #8b5cf6, #ec4899);
+            -webkit-background-clip: text;
+            background-clip: text; /* <--- Agrega esta línea para quitar la advertencia de VS Code */
+            -webkit-text-fill-color: transparent;
+        }   
+
+        .nav-buttons .btn {
+            background-color: var(--accent-color);
+            color: white;
+            border: none;
+            padding: 0.6rem 1.2rem;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: background 0.2s;
+        }
+
+        .nav-buttons .btn:hover {
+            background-color: var(--accent-hover);
+        }
+
+        main {
+            flex: 1;
+            padding: 3rem 2rem;
+            max-width: 1200px;
+            margin: 0 auto;
+            text-align: center;
+        }
+
+        .hero h1 {
+            font-size: 3.5rem;
+            margin-bottom: 1rem;
+        }
+
+        .hero p {
+            color: var(--text-muted);
+            font-size: 1.2rem;
+            max-width: 600px;
+            margin: 0 auto 3rem auto;
+        }
+
+        /* Estilos del Modal de Login */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background-color: rgba(0, 0, 0, 0.75);
+            backdrop-filter: blur(5px);
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+
+        .modal-content {
+            background-color: var(--card-bg);
+            padding: 2.5rem;
+            border-radius: 16px;
+            width: 100%;
+            max-width: 400px;
+            border: 1px solid #232330;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.5);
+            position: relative;
+        }
+
+        .close-btn {
+            position: absolute;
+            top: 15px; right: 20px;
+            font-size: 1.5rem;
+            cursor: pointer;
+            color: var(--text-muted);
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+            text-align: left;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            color: var(--text-muted);
+        }
+
+        .form-group input {
+            width: 100%;
+            padding: 0.8rem;
+            border-radius: 8px;
+            border: 1px solid #232330;
+            background-color: #0b0b0f;
+            color: white;
+            box-sizing: border-box;
+        }
+
+        .form-group input:focus {
+            border-color: var(--accent-color);
+            outline: none;
+        }
+
+        .submit-btn {
+            width: 100%;
+            background-color: var(--accent-color);
+            color: white;
+            border: none;
+            padding: 0.8rem;
+            border-radius: 8px;
+            font-weight: bold;
+            cursor: pointer;
+            font-size: 1rem;
+        }
+
+        .submit-btn:hover {
+            background-color: var(--accent-hover);
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <div class="logo">MANTRA</div>
+        <div class="nav-buttons">
+            <button class="btn" onclick="openModal()">Iniciar Sesión</button>
         </div>
+    </header>
 
-        <div id="loginForm" class="form-container active">
-            <div class="form-group"><label>Correo</label><input type="email" id="loginEmail"></div>
-            <div class="form-group"><label>Contraseña</label><input type="password" id="loginPass"></div>
-            <button class="submit-btn" onclick="processLogin()">Acceder</button>
+    <main>
+        <div class="hero">
+            <h1>Descubre los mejores eventos</h1>
+            <p>Conéctate con organizadores, asiste a los raves más exclusivos y vive noches inolvidables en la CDMX.</p>
         </div>
+    </main>
 
-        <div id="registerForm" class="form-container">
-            <div class="form-group"><label>Nombre Completo</label><input type="text" id="regNombre"></div>
-            <div class="form-group"><label>Correo</label><input type="email" id="regEmail"></div>
-            <div class="form-group"><label>Contraseña</label><input type="password" id="regPass"></div>
+    <div id="loginModal" class="modal">
+        <div class="modal-content">
+            <span class="close-btn" onclick="closeModal()">&times;</span>
+            <h2 style="margin-top: 0; margin-bottom: 1.5rem;">Entrar a Mantra</h2>
+            
             <div class="form-group">
-                <label>Tipo de Usuario</label>
-                <select id="regRol" style="width: 100%; padding: 0.8rem; background: #0b0b0f; color: white; border-radius: 8px;">
-                    <option value="participante">Participante</option>
-                    <option value="organizador">Organizador</option>
-                </select>
+                <label for="userEmail">Correo Electrónico</label>
+                <input type="email" id="userEmail" placeholder="ejemplo@mantra.com">
             </div>
-            <button class="submit-btn" onclick="processRegister()">Crear Cuenta</button>
+
+            <div class="form-group">
+                <label for="userPassword">Contraseña</label>
+                <input type="password" id="userPassword" placeholder="••••••••">
+            </div>
+
+            <button class="submit-btn" onclick="processLogin()">Ingresar Seguro</button>
         </div>
     </div>
-</div>
 
-<script>
-    function showForm(type) {
-        document.querySelectorAll('.form-container').forEach(f => f.classList.remove('active'));
-        document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
-        
-        if(type === 'login') {
-            document.getElementById('loginForm').classList.add('active');
-            event.target.classList.add('active'); // Ojo: ajustar si clickea el tab
-        } else {
-            document.getElementById('registerForm').classList.add('active');
-            event.target.classList.add('active');
+    <script>
+        function openModal() {
+            document.getElementById('loginModal').style.display = 'flex';
         }
-    }
 
-    async function processRegister() {
-        // Aquí conectaremos con tu nueva ruta de backend /api/register
-        const userData = {
-            nombre: document.getElementById('regNombre').value,
-            email: document.getElementById('regEmail').value,
-            password: document.getElementById('regPass').value,
-            rol: document.getElementById('regRol').value
-        };
-
-        const response = await fetch('/api/register', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(userData)
-        });
-
-        const result = await response.json();
-        if(response.ok) {
-            alert("¡Registro exitoso! Ya puedes iniciar sesión.");
-            showForm('login');
-        } else {
-            alert(result.error || "Error en el registro");
+        function closeModal() {
+            document.getElementById('loginModal').style.display = 'none';
         }
-    }
-</script>
+
+        async function processLogin() {
+            const emailInput = document.getElementById('userEmail').value;
+            const passwordInput = document.getElementById('userPassword').value;
+
+            if (!emailInput || !passwordInput) {
+                alert("Por favor, llena todos los campos.");
+                return;
+            }
+
+            try {
+                // Petición directa a la API de tu index.js
+                const response = await fetch('/api/login', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ email: emailInput, password: passwordInput })
+                });
+
+                const data = await response.json();
+
+                if (!response.ok) {
+                    alert(data.error || "Error al iniciar sesión");
+                    return;
+                }
+
+                alert(`¡Bienvenido a MANTRA, ${data.usuario.nombre}!`);
+                closeModal();
+
+                // Guardar datos en la sesión del navegador
+                localStorage.setItem('usuarioMantra', JSON.stringify(data.usuario));
+
+                // Redirección inteligente según el rol que viene desde la BD en Render
+                if (data.usuario.role === 'owner' || data.usuario.rol === 'owner') {
+                    window.location.href = 'owner-dashboard.html';
+                } else if (data.usuario.role === 'organizador' || data.usuario.rol === 'organizador') {
+                    window.location.href = 'hugo-dashboard.html';
+                } else {
+                    window.location.href = 'feed-eventos.html';
+                }
+
+            } catch (error) {
+                console.error("Error en la conexión:", error);
+                alert("No se pudo conectar con el servidor de Render.");
+            }
+        }
+    </script>
+</body>
+</html>
