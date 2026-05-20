@@ -382,6 +382,16 @@ function logout(){
 localStorage.removeItem('usuarioMantra');
 window.location.href = 'index.html';
 }
+  
+function mostrarEditorPerfil(){
+  document.getElementById('editorPerfil').style.display = 'block';
+  document.getElementById('btnEditarPerfil').style.display = 'none';
+}
+
+function ocultarEditorPerfil(){
+  document.getElementById('editorPerfil').style.display = 'none';
+  document.getElementById('btnEditarPerfil').style.display = 'inline-block';
+}
 async function guardarPerfil(){
   const biografia = document.getElementById('editBio').value;
   const intereses = document.getElementById('editIntereses').value;
@@ -402,6 +412,7 @@ async function guardarPerfil(){
 
     alert('Perfil actualizado');
     cargarPerfil();
+    ocultarEditorPerfil();
 
   }catch(error){
     console.error(error);
