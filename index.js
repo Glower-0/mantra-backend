@@ -754,6 +754,130 @@ error:
 
 });
 /* ==========================
+   PERFIL PARTICIPANTE
+========================== */
+
+app.get(
+'/api/perfil/:id',
+async(req,res)=>{
+
+try{
+
+const idUsuario =
+req.params.id;
+
+const perfil =
+await pool.query(
+`
+SELECT
+u.id_usuario,
+u.nombre,
+u.email,
+u.biografia,
+u.foto_perfil,
+p.intereses,
+
+COUNT(DISTINCT a.id_evento)
+AS eventos_asistidos,
+
+COUNT(DISTINCT r.id_resena)
+AS total_resenas
+
+FROM public.usuario u
+
+LEFT JOIN public.participante p
+ON u.id_usuario = p.id_usuario
+
+LEFT JOIN public.asistencia a
+ON u.id_usuario = a.id_participante
+
+LEFT JOIN public.resena r
+ON u.id_usuario = r.id_participante
+
+WHERE u.id_usuario = $1
+
+GROUP BY
+u.id_usuario,
+p.intereses
+`,
+[idUsuario]
+);
+
+res.json(
+perfil.rows[0]
+);
+
+}catch(error){
+
+console.error(error);
+
+res.status(500).json({
+error:
+'Error obteniendo perfil'
+});
+
+}
+
+});
+
+/* ==========================
+   SUBIR FOTO PERFIL
+========================== */
+
+app.post(
+'/api/perfil/foto',
+upload.single('foto'),
+async(req,res)=>{
+
+try{
+
+const {
+id_usuario
+}
+= req.body;
+
+if(!req.file){
+
+return res.status(400).json({
+error:
+'No se subió imagen'
+});
+
+}
+
+const foto =
+`/uploads/${req.file.filename}`;
+
+await pool.query(
+`
+UPDATE public.usuario
+SET foto_perfil = $1
+WHERE id_usuario = $2
+`,
+[
+foto,
+id_usuario
+]
+);
+
+res.json({
+success:true,
+foto
+});
+
+}catch(error){
+
+console.error(error);
+
+res.status(500).json({
+error:
+'Error subiendo foto'
+});
+
+}
+
+});
+/* ==========================
    SERVER
 ========================== */
 
