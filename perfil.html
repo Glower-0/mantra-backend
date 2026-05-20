@@ -236,7 +236,15 @@ Cambiar foto
 <p id="bio">Sin biografía.</p>
 <span class="intereses" id="intereses">Sin intereses</span>
 </div>
+<div style="margin-top:25px;">
+  <textarea id="editBio" placeholder="Editar biografía..." style="width:100%;height:90px;padding:14px;border:none;border-radius:16px;background:#1d1d29;color:white;resize:none;margin-bottom:12px;"></textarea>
 
+  <input id="editIntereses" placeholder="Editar intereses" style="width:100%;padding:14px;border:none;border-radius:16px;background:#1d1d29;color:white;margin-bottom:12px;">
+
+  <button onclick="guardarPerfil()" style="padding:13px 18px;border:none;border-radius:15px;background:#00bfff;color:white;font-weight:700;cursor:pointer;">
+    Guardar cambios
+  </button>
+</div>
 </section>
 
 <section class="stats">
@@ -257,10 +265,13 @@ Cambiar foto
 </section>
 
 <section class="section">
-<h2>Actividad reciente</h2>
-<p class="empty">
-Aquí después mostraremos tus eventos asistidos, reseñas y favoritos.
-</p>
+  <h2>Actividad reciente</h2>
+
+  <h3 style="margin-bottom:15px;">🎟 Eventos asistidos</h3>
+  <div id="actividadEventos"></div>
+
+  <h3 style="margin:25px 0 15px;">⭐ Reseñas hechas</h3>
+  <div id="actividadResenas"></div>
 </section>
 
 </main>
@@ -288,6 +299,12 @@ perfil.biografia || 'Sin biografía.';
 
 document.getElementById('intereses').innerText =
 perfil.intereses || 'Sin intereses registrados';
+  
+document.getElementById('editBio').value =
+perfil.biografia || '';
+
+document.getElementById('editIntereses').value =
+perfil.intereses || '';
 
 document.getElementById('eventosAsistidos').innerText =
 perfil.eventos_asistidos || 0;
@@ -353,8 +370,78 @@ function logout(){
 localStorage.removeItem('usuarioMantra');
 window.location.href = 'index.html';
 }
+async function guardarPerfil(){
+  const biografia = document.getElementById('editBio').value;
+  const intereses = document.getElementById('editIntereses').value;
 
+  try{
+    const response = await fetch(`/api/perfil/${usuario.id_usuario}`, {
+      method:'PUT',
+      headers:{ 'Content-Type':'application/json' },
+      body:JSON.stringify({ biografia, intereses })
+    });
+
+    const data = await response.json();
+
+    if(!response.ok){
+      alert(data.error || 'Error al actualizar');
+      return;
+    }
+
+    alert('Perfil actualizado');
+    cargarPerfil();
+
+  }catch(error){
+    console.error(error);
+    alert('Error de conexión');
+  }
+}
+
+async function cargarActividad(){
+  try{
+    const response = await fetch(`/api/perfil/${usuario.id_usuario}/actividad`);
+    const data = await response.json();
+
+    const eventosDiv = document.getElementById('actividadEventos');
+    const resenasDiv = document.getElementById('actividadResenas');
+
+    eventosDiv.innerHTML = '';
+    resenasDiv.innerHTML = '';
+
+    if(data.eventos.length === 0){
+      eventosDiv.innerHTML = '<p class="empty">Aún no has asistido a eventos.</p>';
+    }else{
+      data.eventos.forEach(evento => {
+        eventosDiv.innerHTML += `
+          <div style="background:#181824;padding:18px;border-radius:18px;margin-bottom:12px;">
+            <strong>${evento.titulo}</strong>
+            <p style="color:#aaa;">📅 ${new Date(evento.fecha).toLocaleDateString('es-MX')} · ${evento.ciudad || ''}</p>
+          </div>
+        `;
+      });
+    }
+
+    if(data.resenas.length === 0){
+      resenasDiv.innerHTML = '<p class="empty">Aún no has publicado reseñas.</p>';
+    }else{
+      data.resenas.forEach(resena => {
+        resenasDiv.innerHTML += `
+          <div style="background:#181824;padding:18px;border-radius:18px;margin-bottom:12px;">
+            <strong>${resena.titulo}</strong>
+            <p style="color:#ffd700;">${'⭐'.repeat(resena.calificacion)}</p>
+            <p style="color:#ccc;">${resena.comentario || 'Sin comentario'}</p>
+          </div>
+        `;
+      });
+    }
+
+  }catch(error){
+    console.error(error);
+  }
+}
+  
 cargarPerfil();
+cargarActividad();
 </script>
 
 </body>
