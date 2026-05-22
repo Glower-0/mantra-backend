@@ -386,13 +386,13 @@ Publicar evento
 const usuario = JSON.parse(localStorage.getItem('usuarioMantra'));
 
 if(!usuario){
-alert('Debes iniciar sesión.');
-window.location.href = 'index.html';
+  alert('Debes iniciar sesión.');
+  window.location.href = 'index.html';
 }
 
 if(usuario.rol !== 'organizador' && usuario.rol !== 'owner'){
-alert('No tienes permiso para entrar aquí.');
-window.location.href = 'index.html';
+  alert('No tienes permiso para entrar aquí.');
+  window.location.href = 'index.html';
 }
 
 document.getElementById('userName').innerText =
@@ -404,200 +404,189 @@ const preview = document.getElementById('preview');
 const imagenInput = document.getElementById('imagen');
 
 imagenInput.addEventListener('change', () => {
-const file = imagenInput.files[0];
+  const file = imagenInput.files[0];
 
-if(!file){
-preview.innerHTML = 'Vista previa del promocional';
-return;
-}
+  if(!file){
+    preview.innerHTML = 'Vista previa del promocional';
+    return;
+  }
 
-const reader = new FileReader();
+  const reader = new FileReader();
 
-reader.onload = e => {
-preview.innerHTML = `<img src="${e.target.result}" alt="Preview">`;
-};
+  reader.onload = e => {
+    preview.innerHTML = `<img src="${e.target.result}" alt="Preview">`;
+  };
 
-reader.readAsDataURL(file);
+  reader.readAsDataURL(file);
 });
 
 form.addEventListener('submit', async e => {
-e.preventDefault();
+  e.preventDefault();
 
-const btnPublicar = document.getElementById('btnPublicar');
+  const btnPublicar = document.getElementById('btnPublicar');
 
-if(btnPublicar.disabled){
-return;
-}
+  if(btnPublicar.disabled){
+    return;
+  }
 
-btnPublicar.disabled = true;
-btnPublicar.innerText = 'Publicando...';
+  btnPublicar.disabled = true;
+  btnPublicar.innerText = 'Publicando...';
 
-const formData = new FormData();
+  const formData = new FormData();
 
-formData.append('titulo', document.getElementById('titulo').value);
-formData.append('fecha', document.getElementById('fecha').value);
-formData.append('hora', document.getElementById('hora').value);
-formData.append('calle', document.getElementById('calle').value);
-formData.append('ciudad', document.getElementById('ciudad').value);
-formData.append('id_categoria', document.getElementById('id_categoria').value);
-formData.append('idOrganizador', usuario.id_usuario);
+  formData.append('titulo', document.getElementById('titulo').value);
+  formData.append('fecha', document.getElementById('fecha').value);
+  formData.append('hora', document.getElementById('hora').value);
+  formData.append('calle', document.getElementById('calle').value);
+  formData.append('ciudad', document.getElementById('ciudad').value);
+  formData.append('id_categoria', document.getElementById('id_categoria').value);
+  formData.append('idOrganizador', usuario.id_usuario);
 
-if(imagenInput.files[0]){
-formData.append('imagen', imagenInput.files[0]);
-}
+  if(imagenInput.files[0]){
+    formData.append('imagen', imagenInput.files[0]);
+  }
 
-try{
-message.style.color = '#ccc';
-message.innerText = 'Publicando evento...';
+  try{
+    message.style.color = '#ccc';
+    message.innerText = 'Publicando evento...';
 
-const response = await fetch('/api/eventos/crear', {
-method:'POST',
-body:formData
-});
+    const response = await fetch('/api/eventos/crear', {
+      method:'POST',
+      body:formData
+    });
 
-const data = await response.json();
+    const data = await response.json();
 
-if(!response.ok){
-message.style.color = '#ff5a5a';
-message.innerText = data.error || 'Error al publicar evento';
+    if(!response.ok){
+      message.style.color = '#ff5a5a';
+      message.innerText = data.error || 'Error al publicar evento';
 
-btnPublicar.disabled = false;
-btnPublicar.innerText = 'Publicar evento';
+      btnPublicar.disabled = false;
+      btnPublicar.innerText = 'Publicar evento';
+      return;
+    }
 
-return;
-}
+    message.style.color = '#00ff99';
+    message.innerText = 'Evento publicado correctamente 🎉';
 
-message.style.color = '#00ff99';
-message.innerText = 'Evento publicado correctamente 🎉';
+    form.reset();
+    preview.innerHTML = 'Vista previa del promocional';
 
-form.reset();
-preview.innerHTML = 'Vista previa del promocional';
+    await cargarEventos();
+    await cargarMetricas();
 
-await cargarEventos();
-await cargarMetricas();
+    btnPublicar.disabled = false;
+    btnPublicar.innerText = 'Publicar evento';
 
-btnPublicar.disabled = false;
-btnPublicar.innerText = 'Publicar evento';
+  }catch(error){
+    console.error(error);
+    message.style.color = '#ff5a5a';
+    message.innerText = 'Error de conexión';
 
-}catch(error){
-console.error(error);
-message.style.color = '#ff5a5a';
-message.innerText = 'Error de conexión';
-
-btnPublicar.disabled = false;
-btnPublicar.innerText = 'Publicar evento';
-}
-});
-  
-cargarEventos();
-cargarMetricas();
-
-}catch(error){
-console.error(error);
-message.style.color = '#ff5a5a';
-message.innerText = 'Error de conexión';
-}
+    btnPublicar.disabled = false;
+    btnPublicar.innerText = 'Publicar evento';
+  }
 });
 
 async function cargarEventos(){
-try{
-const response = await fetch(`/api/eventos/mis-eventos/${usuario.id_usuario}`);
-const eventos = await response.json();
+  try{
+    const response = await fetch(`/api/eventos/mis-eventos/${usuario.id_usuario}`);
+    const eventos = await response.json();
 
-const grid = document.getElementById('eventsGrid');
-grid.innerHTML = '';
+    const grid = document.getElementById('eventsGrid');
+    grid.innerHTML = '';
 
-if(eventos.length === 0){
-grid.innerHTML = '<p class="empty">Aún no has publicado eventos.</p>';
-return;
-}
+    if(eventos.length === 0){
+      grid.innerHTML = '<p class="empty">Aún no has publicado eventos.</p>';
+      return;
+    }
 
-eventos.forEach(evento => {
-const card = document.createElement('div');
-card.className = 'event-card';
+    eventos.forEach(evento => {
+      const card = document.createElement('div');
+      card.className = 'event-card';
 
-const fecha = evento.fecha
-? new Date(evento.fecha).toLocaleDateString('es-MX')
-: 'Sin fecha';
+      const fecha = evento.fecha
+        ? new Date(evento.fecha).toLocaleDateString('es-MX')
+        : 'Sin fecha';
 
-card.innerHTML = `
-<div class="event-img">
-${evento.imagen_url
-? `<img src="${evento.imagen_url}" alt="${evento.titulo}">`
-: 'Sin promocional'}
-</div>
+      card.innerHTML = `
+        <div class="event-img">
+          ${evento.imagen_url
+            ? `<img src="${evento.imagen_url}" alt="${evento.titulo}">`
+            : 'Sin promocional'}
+        </div>
 
-<div class="event-info">
-<h3>${evento.titulo}</h3>
-<p>📅 ${fecha} ${evento.hora || ''}</p>
-<p>📍 ${evento.calle || ''}, ${evento.ciudad || ''}</p>
-<p>👥 ${evento.asistentes || 0} asistentes</p>
-<p>⭐ ${Number(evento.promedio_calificacion || 0).toFixed(1)}</p>
+        <div class="event-info">
+          <h3>${evento.titulo}</h3>
+          <p>📅 ${fecha} ${evento.hora || ''}</p>
+          <p>📍 ${evento.calle || ''}, ${evento.ciudad || ''}</p>
+          <p>👥 ${evento.asistentes || 0} asistentes</p>
+          <p>⭐ ${Number(evento.promedio_calificacion || 0).toFixed(1)}</p>
 
-<button class="delete-btn" onclick="eliminarEvento(${evento.id_evento})">
-Eliminar
-</button>
-</div>
-`;
+          <button class="delete-btn" onclick="eliminarEvento(${evento.id_evento})">
+            Eliminar
+          </button>
+        </div>
+      `;
 
-grid.appendChild(card);
-});
+      grid.appendChild(card);
+    });
 
-}catch(error){
-console.error(error);
-document.getElementById('eventsGrid').innerHTML =
-'<p class="empty">Error al cargar eventos.</p>';
-}
+  }catch(error){
+    console.error(error);
+    document.getElementById('eventsGrid').innerHTML =
+    '<p class="empty">Error al cargar eventos.</p>';
+  }
 }
 
 async function cargarMetricas(){
-try{
-const response = await fetch(`/api/metricas?id_organizador=${usuario.id_usuario}`);
-const data = await response.json();
+  try{
+    const response = await fetch(`/api/metricas?id_organizador=${usuario.id_usuario}`);
+    const data = await response.json();
 
-document.getElementById('totalEventos').innerText =
-data.total_eventos || 0;
+    document.getElementById('totalEventos').innerText =
+    data.total_eventos || 0;
 
-document.getElementById('totalAsistentes').innerText =
-data.total_asistentes || 0;
+    document.getElementById('totalAsistentes').innerText =
+    data.total_asistentes || 0;
 
-document.getElementById('promedioCalificacion').innerText =
-Number(data.promedio_calificacion || 0).toFixed(1);
+    document.getElementById('promedioCalificacion').innerText =
+    Number(data.promedio_calificacion || 0).toFixed(1);
 
-}catch(error){
-console.error(error);
-}
+  }catch(error){
+    console.error(error);
+  }
 }
 
 async function eliminarEvento(idEvento){
-const confirmar = confirm('¿Seguro que quieres eliminar este evento?');
+  const confirmar = confirm('¿Seguro que quieres eliminar este evento?');
 
-if(!confirmar) return;
+  if(!confirmar) return;
 
-try{
-const response = await fetch(`/api/eventos/eliminar/${idEvento}`, {
-method:'DELETE'
-});
+  try{
+    const response = await fetch(`/api/eventos/eliminar/${idEvento}`, {
+      method:'DELETE'
+    });
 
-const data = await response.json();
+    const data = await response.json();
 
-if(!response.ok){
-alert(data.error || 'No se pudo eliminar');
-return;
-}
+    if(!response.ok){
+      alert(data.error || 'No se pudo eliminar');
+      return;
+    }
 
-cargarEventos();
-cargarMetricas();
+    await cargarEventos();
+    await cargarMetricas();
 
-}catch(error){
-console.error(error);
-alert('Error de conexión');
-}
+  }catch(error){
+    console.error(error);
+    alert('Error de conexión');
+  }
 }
 
 function logout(){
-localStorage.removeItem('usuarioMantra');
-window.location.href = 'index.html';
+  localStorage.removeItem('usuarioMantra');
+  window.location.href = 'index.html';
 }
 
 cargarEventos();
