@@ -3,7 +3,7 @@ const path = require('path');
 const express = require('express');
 const { Pool } = require('pg');
 require('dotenv').config();
-
+const cloudinary = require('cloudinary').v2;
 const app = express();
 const PORT = process.env.PORT || 3000;
 
