@@ -1,9 +1,10 @@
-const multer = require('multer');
-const path = require('path');
 const express = require('express');
+const path = require('path');
+const multer = require('multer');
 const { Pool } = require('pg');
-require('dotenv').config();
 const cloudinary = require('cloudinary').v2;
+require('dotenv').config();
+
 const app = express();
 const PORT = process.env.PORT || 3000;
 
@@ -16,45 +17,49 @@ app.use(express.urlencoded({ extended: true }));
 app.use(express.static(path.join(__dirname)));
 
 /* ==========================
-   IMÁGENES / UPLOADS
+   CLOUDINARY + MULTER
 ========================== */
 
-app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
-
-const storage = multer.diskStorage({
-  destination: function (req, file, cb) {
-    cb(null, 'uploads/');
-  },
-
-  filename: function (req, file, cb) {
-    const uniqueName = Date.now() + path.extname(file.originalname);
-    cb(null, uniqueName);
-  }
+cloudinary.config({
+  cloud_name: 'dkrubq7db'
 });
 
-const upload = multer({
-  storage: storage,
+const storage = multer.memoryStorage();
 
+const upload = multer({
+  storage,
   limits: {
     fileSize: 5 * 1024 * 1024
   },
-
   fileFilter: function (req, file, cb) {
     const allowed = /jpg|jpeg|png|webp/;
-    const ext = allowed.test(
-      path.extname(file.originalname).toLowerCase()
-    );
+    const ext = allowed.test(path.extname(file.originalname).toLowerCase());
 
-    if (ext) {
-      return cb(null, true);
-    }
+    if (ext) return cb(null, true);
 
     cb(new Error('Solo se permiten imágenes JPG, JPEG, PNG o WEBP'));
   }
 });
 
+function subirACloudinary(buffer, folder) {
+  return new Promise((resolve, reject) => {
+    const stream = cloudinary.uploader.upload_stream(
+      {
+        folder,
+        resource_type: 'image'
+      },
+      (error, result) => {
+        if (error) reject(error);
+        else resolve(result.secure_url);
+      }
+    );
+
+    stream.end(buffer);
+  });
+}
+
 /* ==========================
-   CONEXIÓN POSTGRESQL
+   POSTGRESQL
 ========================== */
 
 const pool = new Pool({
@@ -66,9 +71,9 @@ const pool = new Pool({
 
 pool.query('SELECT NOW()', (err) => {
   if (err) {
-    console.error('❌ Error al conectar a PostgreSQL:', err.stack);
+    console.error('❌ Error PostgreSQL:', err.stack);
   } else {
-    console.log('✅ Conexión segura establecida con PostgreSQL en Render');
+    console.log('✅ PostgreSQL conectado en Render');
   }
 });
 
@@ -90,13 +95,9 @@ app.post('/api/login', async (req, res) => {
   try {
     const userQuery = await pool.query(
       `
-      SELECT
-        id_usuario,
-        nombre,
-        email
+      SELECT id_usuario, nombre, email
       FROM public.usuario
-      WHERE email = $1
-      AND password = $2
+      WHERE email = $1 AND password = $2
       `,
       [email, password]
     );
@@ -108,7 +109,6 @@ app.post('/api/login', async (req, res) => {
     }
 
     const usuario = userQuery.rows[0];
-
     let rol = 'asistidor';
 
     if (usuario.email === 'owner@mantra.com') {
@@ -123,9 +123,7 @@ app.post('/api/login', async (req, res) => {
         [usuario.id_usuario]
       );
 
-      if (orgQuery.rows.length > 0) {
-        rol = 'organizador';
-      }
+      if (orgQuery.rows.length > 0) rol = 'organizador';
     }
 
     res.json({
@@ -134,7 +132,7 @@ app.post('/api/login', async (req, res) => {
         id_usuario: usuario.id_usuario,
         nombre: usuario.nombre,
         email: usuario.email,
-        rol: rol
+        rol
       }
     });
 
@@ -151,22 +149,11 @@ app.post('/api/login', async (req, res) => {
 ========================== */
 
 app.post('/api/register/asistidor', async (req, res) => {
-  const {
-    nombre,
-    email,
-    password,
-    edad,
-    biografia,
-    intereses
-  } = req.body;
+  const { nombre, email, password, edad, biografia, intereses } = req.body;
 
   try {
     const existe = await pool.query(
-      `
-      SELECT email
-      FROM public.usuario
-      WHERE email = $1
-      `,
+      `SELECT email FROM public.usuario WHERE email = $1`,
       [email]
     );
 
@@ -177,10 +164,7 @@ app.post('/api/register/asistidor', async (req, res) => {
     }
 
     const nextId = await pool.query(
-      `
-      SELECT COALESCE(MAX(id_usuario), 0) + 1 AS id
-      FROM public.usuario
-      `
+      `SELECT COALESCE(MAX(id_usuario), 0) + 1 AS id FROM public.usuario`
     );
 
     const idUsuario = nextId.rows[0].id;
@@ -188,39 +172,19 @@ app.post('/api/register/asistidor', async (req, res) => {
     await pool.query(
       `
       INSERT INTO public.usuario
-      (
-        id_usuario,
-        nombre,
-        email,
-        password,
-        edad,
-        biografia
-      )
+      (id_usuario, nombre, email, password, edad, biografia)
       VALUES ($1, $2, $3, $4, $5, $6)
       `,
-      [
-        idUsuario,
-        nombre,
-        email,
-        password,
-        edad,
-        biografia
-      ]
+      [idUsuario, nombre, email, password, edad, biografia]
     );
 
     await pool.query(
       `
       INSERT INTO public.participante
-      (
-        id_usuario,
-        intereses
-      )
+      (id_usuario, intereses)
       VALUES ($1, $2)
       `,
-      [
-        idUsuario,
-        intereses
-      ]
+      [idUsuario, intereses]
     );
 
     res.json({
@@ -241,21 +205,11 @@ app.post('/api/register/asistidor', async (req, res) => {
 ========================== */
 
 app.post('/api/register/organizador', async (req, res) => {
-  const {
-    nombre,
-    email,
-    password,
-    edad,
-    biografia
-  } = req.body;
+  const { nombre, email, password, edad, biografia } = req.body;
 
   try {
     const existe = await pool.query(
-      `
-      SELECT email
-      FROM public.usuario
-      WHERE email = $1
-      `,
+      `SELECT email FROM public.usuario WHERE email = $1`,
       [email]
     );
 
@@ -266,10 +220,7 @@ app.post('/api/register/organizador', async (req, res) => {
     }
 
     const nextId = await pool.query(
-      `
-      SELECT COALESCE(MAX(id_usuario), 0) + 1 AS id
-      FROM public.usuario
-      `
+      `SELECT COALESCE(MAX(id_usuario), 0) + 1 AS id FROM public.usuario`
     );
 
     const idUsuario = nextId.rows[0].id;
@@ -277,39 +228,19 @@ app.post('/api/register/organizador', async (req, res) => {
     await pool.query(
       `
       INSERT INTO public.usuario
-      (
-        id_usuario,
-        nombre,
-        email,
-        password,
-        edad,
-        biografia
-      )
+      (id_usuario, nombre, email, password, edad, biografia)
       VALUES ($1, $2, $3, $4, $5, $6)
       `,
-      [
-        idUsuario,
-        nombre,
-        email,
-        password,
-        edad,
-        biografia
-      ]
+      [idUsuario, nombre, email, password, edad, biografia]
     );
 
     await pool.query(
       `
       INSERT INTO public.organizador
-      (
-        id_usuario,
-        reputacion
-      )
+      (id_usuario, reputacion)
       VALUES ($1, $2)
       `,
-      [
-        idUsuario,
-        0.00
-      ]
+      [idUsuario, 0.00]
     );
 
     res.json({
@@ -326,13 +257,11 @@ app.post('/api/register/organizador', async (req, res) => {
 });
 
 /* ==========================
-   FEED ASISTIDOR
+   FEED EVENTOS
 ========================== */
 
 app.get('/api/feed', async (req, res) => {
-
   try {
-
     const eventos = await pool.query(
       `
       SELECT
@@ -345,13 +274,10 @@ app.get('/api/feed', async (req, res) => {
         e.imagen_url,
         c.nombre_cat
       FROM public.evento e
-
       LEFT JOIN public.evento_categoria ec
-      ON e.id_evento = ec.id_evento
-
+        ON e.id_evento = ec.id_evento
       LEFT JOIN public.categoria c
-      ON ec.id_categoria = c.id_categoria
-
+        ON ec.id_categoria = c.id_categoria
       ORDER BY e.fecha ASC
       `
     );
@@ -359,16 +285,13 @@ app.get('/api/feed', async (req, res) => {
     res.json(eventos.rows);
 
   } catch (error) {
-
     console.error(error);
-
     res.status(500).json({
-      error: 'Error cargando eventos'
+      error: 'Error cargando eventos.'
     });
-
   }
-
 });
+
 /* ==========================
    ASISTENCIA
 ========================== */
@@ -380,17 +303,11 @@ app.post('/api/asistencia', async (req, res) => {
     await pool.query(
       `
       INSERT INTO public.asistencia
-      (
-        id_participante,
-        id_evento
-      )
+      (id_participante, id_evento)
       VALUES ($1, $2)
       ON CONFLICT DO NOTHING
       `,
-      [
-        id_usuario,
-        id_evento
-      ]
+      [id_usuario, id_evento]
     );
 
     res.json({
@@ -407,7 +324,7 @@ app.post('/api/asistencia', async (req, res) => {
 });
 
 /* ==========================
-   CREAR EVENTO CON IMAGEN
+   CREAR EVENTO CON CLOUDINARY
 ========================== */
 
 app.post('/api/eventos/crear', upload.single('imagen'), async (req, res) => {
@@ -423,14 +340,11 @@ app.post('/api/eventos/crear', upload.single('imagen'), async (req, res) => {
 
   try {
     const imagen_url = req.file
-      ? `/uploads/${req.file.filename}`
+      ? await subirACloudinary(req.file.buffer, 'mantra/eventos')
       : null;
 
     const nextId = await pool.query(
-      `
-      SELECT COALESCE(MAX(id_evento), 0) + 1 AS id
-      FROM public.evento
-      `
+      `SELECT COALESCE(MAX(id_evento), 0) + 1 AS id FROM public.evento`
     );
 
     const idEvento = nextId.rows[0].id;
@@ -438,45 +352,21 @@ app.post('/api/eventos/crear', upload.single('imagen'), async (req, res) => {
     await pool.query(
       `
       INSERT INTO public.evento
-      (
-        id_evento,
-        titulo,
-        fecha,
-        hora,
-        calle,
-        ciudad,
-        imagen_url,
-        id_organizador
-      )
+      (id_evento, titulo, fecha, hora, calle, ciudad, imagen_url, id_organizador)
       VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
       `,
-      [
-        idEvento,
-        titulo,
-        fecha,
-        hora,
-        calle,
-        ciudad,
-        imagen_url,
-        idOrganizador
-      ]
+      [idEvento, titulo, fecha, hora, calle, ciudad, imagen_url, idOrganizador]
     );
 
     if (id_categoria) {
       await pool.query(
         `
         INSERT INTO public.evento_categoria
-        (
-          id_evento,
-          id_categoria
-        )
+        (id_evento, id_categoria)
         VALUES ($1, $2)
         ON CONFLICT DO NOTHING
         `,
-        [
-          idEvento,
-          id_categoria
-        ]
+        [idEvento, id_categoria]
       );
     }
 
@@ -546,10 +436,7 @@ app.delete('/api/eventos/eliminar/:id', async (req, res) => {
 
   try {
     await pool.query(
-      `
-      DELETE FROM public.evento
-      WHERE id_evento = $1
-      `,
+      `DELETE FROM public.evento WHERE id_evento = $1`,
       [idEvento]
     );
 
@@ -600,284 +487,154 @@ app.get('/api/metricas', async (req, res) => {
 });
 
 /* ==========================
-   OWNER / ADMIN
+   RESEÑAS
 ========================== */
 
-app.get('/api/owner/usuarios', async (req, res) => {
+app.post('/api/resenas', async (req, res) => {
+  const {
+    calificacion,
+    comentario,
+    id_evento,
+    id_participante
+  } = req.body;
+
   try {
-    const queryDueno = `
+    const nextId = await pool.query(
+      `SELECT COALESCE(MAX(id_resena), 0) + 1 AS id FROM public.resena`
+    );
+
+    const idResena = nextId.rows[0].id;
+
+    await pool.query(
+      `
+      INSERT INTO public.resena
+      (id_resena, calificacion, comentario, fecha_publicacion, id_evento, id_participante)
+      VALUES ($1, $2, $3, CURRENT_DATE, $4, $5)
+      `,
+      [idResena, calificacion, comentario, id_evento, id_participante]
+    );
+
+    res.json({
+      success: true,
+      message: 'Reseña publicada.'
+    });
+
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({
+      error: 'Error creando reseña.'
+    });
+  }
+});
+
+app.get('/api/resenas/:idEvento', async (req, res) => {
+  const idEvento = req.params.idEvento;
+
+  try {
+    const resenas = await pool.query(
+      `
+      SELECT
+        r.calificacion,
+        r.comentario,
+        r.fecha_publicacion,
+        u.nombre
+      FROM public.resena r
+      JOIN public.usuario u
+        ON r.id_participante = u.id_usuario
+      WHERE r.id_evento = $1
+      ORDER BY r.fecha_publicacion DESC
+      `,
+      [idEvento]
+    );
+
+    res.json(resenas.rows);
+
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({
+      error: 'Error obteniendo reseñas.'
+    });
+  }
+});
+
+/* ==========================
+   PERFIL
+========================== */
+
+app.get('/api/perfil/:id', async (req, res) => {
+  const idUsuario = req.params.id;
+
+  try {
+    const perfil = await pool.query(
+      `
       SELECT
         u.id_usuario,
         u.nombre,
         u.email,
-        CASE
-          WHEN o.id_usuario IS NOT NULL THEN TRUE
-          ELSE FALSE
-        END AS es_organizador
+        u.biografia,
+        u.foto_perfil,
+        p.intereses,
+        COUNT(DISTINCT a.id_evento) AS eventos_asistidos,
+        COUNT(DISTINCT r.id_resena) AS total_resenas
       FROM public.usuario u
-      LEFT JOIN public.organizador o
-        ON u.id_usuario = o.id_usuario
-      ORDER BY u.id_usuario ASC
-    `;
+      LEFT JOIN public.participante p
+        ON u.id_usuario = p.id_usuario
+      LEFT JOIN public.asistencia a
+        ON u.id_usuario = a.id_participante
+      LEFT JOIN public.resena r
+        ON u.id_usuario = r.id_participante
+      WHERE u.id_usuario = $1
+      GROUP BY u.id_usuario, p.intereses
+      `,
+      [idUsuario]
+    );
 
-    const resultado = await pool.query(queryDueno);
+    res.json(perfil.rows[0]);
 
-    res.json(resultado.rows);
-
-  } catch (err) {
-    console.error(err.stack);
+  } catch (error) {
+    console.error(error);
     res.status(500).json({
-      error: 'Error en la consola del dueño.'
+      error: 'Error obteniendo perfil.'
     });
   }
 });
-/* ==========================
-   CREAR RESEÑA
-========================== */
 
-app.post('/api/resenas', async(req,res)=>{
+app.post('/api/perfil/foto', upload.single('foto'), async (req, res) => {
+  const { id_usuario } = req.body;
 
-try{
+  try {
+    if (!req.file) {
+      return res.status(400).json({
+        error: 'No se subió imagen.'
+      });
+    }
 
-const {
-calificacion,
-comentario,
-id_evento,
-id_participante
-}
-= req.body;
+    const foto = await subirACloudinary(
+      req.file.buffer,
+      'mantra/perfiles'
+    );
 
-const nextId =
-await pool.query(
-`
-SELECT
-COALESCE(MAX(id_resena),0)+1
-AS id
-FROM public.resena
-`
-);
+    await pool.query(
+      `
+      UPDATE public.usuario
+      SET foto_perfil = $1
+      WHERE id_usuario = $2
+      `,
+      [foto, id_usuario]
+    );
 
-const idResena =
-nextId.rows[0].id;
+    res.json({
+      success: true,
+      foto
+    });
 
-await pool.query(
-`
-INSERT INTO public.resena
-(
-id_resena,
-calificacion,
-comentario,
-fecha_publicacion,
-id_evento,
-id_participante
-)
-VALUES
-($1,$2,$3,CURRENT_DATE,$4,$5)
-`,
-[
-idResena,
-calificacion,
-comentario,
-id_evento,
-id_participante
-]
-);
-
-res.json({
-success:true,
-message:
-'Reseña publicada'
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({
+      error: 'Error subiendo foto.'
+    });
+  }
 });
-
-}catch(error){
-
-console.error(error);
-
-res.status(500).json({
-error:
-'Error creando reseña'
-});
-
-}
-
-});
-
-/* ==========================
-   OBTENER RESEÑAS
-========================== */
-
-app.get(
-'/api/resenas/:idEvento',
-async(req,res)=>{
-
-try{
-
-const idEvento =
-req.params.idEvento;
-
-const resenas =
-await pool.query(
-`
-SELECT
-r.calificacion,
-r.comentario,
-r.fecha_publicacion,
-u.nombre
-FROM public.resena r
-
-JOIN public.usuario u
-ON r.id_participante =
-u.id_usuario
-
-WHERE r.id_evento = $1
-
-ORDER BY
-r.fecha_publicacion DESC
-`,
-[idEvento]
-);
-
-res.json(
-resenas.rows
-);
-
-}catch(error){
-
-console.error(error);
-
-res.status(500).json({
-error:
-'Error obteniendo reseñas'
-});
-
-}
-
-});
-/* ==========================
-   PERFIL PARTICIPANTE
-========================== */
-
-app.get(
-'/api/perfil/:id',
-async(req,res)=>{
-
-try{
-
-const idUsuario =
-req.params.id;
-
-const perfil =
-await pool.query(
-`
-SELECT
-u.id_usuario,
-u.nombre,
-u.email,
-u.biografia,
-u.foto_perfil,
-p.intereses,
-
-COUNT(DISTINCT a.id_evento)
-AS eventos_asistidos,
-
-COUNT(DISTINCT r.id_resena)
-AS total_resenas
-
-FROM public.usuario u
-
-LEFT JOIN public.participante p
-ON u.id_usuario = p.id_usuario
-
-LEFT JOIN public.asistencia a
-ON u.id_usuario = a.id_participante
-
-LEFT JOIN public.resena r
-ON u.id_usuario = r.id_participante
-
-WHERE u.id_usuario = $1
-
-GROUP BY
-u.id_usuario,
-p.intereses
-`,
-[idUsuario]
-);
-
-res.json(
-perfil.rows[0]
-);
-
-}catch(error){
-
-console.error(error);
-
-res.status(500).json({
-error:
-'Error obteniendo perfil'
-});
-
-}
-
-});
-
-/* ==========================
-   SUBIR FOTO PERFIL
-========================== */
-
-app.post(
-'/api/perfil/foto',
-upload.single('foto'),
-async(req,res)=>{
-
-try{
-
-const {
-id_usuario
-}
-= req.body;
-
-if(!req.file){
-
-return res.status(400).json({
-error:
-'No se subió imagen'
-});
-
-}
-
-const foto =
-`/uploads/${req.file.filename}`;
-
-await pool.query(
-`
-UPDATE public.usuario
-SET foto_perfil = $1
-WHERE id_usuario = $2
-`,
-[
-foto,
-id_usuario
-]
-);
-
-res.json({
-success:true,
-foto
-});
-
-}catch(error){
-
-console.error(error);
-
-res.status(500).json({
-error:
-'Error subiendo foto'
-});
-
-}
-/* ==========================
-   EDITAR PERFIL
-========================== */
 
 app.put('/api/perfil/:id', async (req, res) => {
   const idUsuario = req.params.id;
@@ -904,20 +661,16 @@ app.put('/api/perfil/:id', async (req, res) => {
 
     res.json({
       success: true,
-      message: 'Perfil actualizado'
+      message: 'Perfil actualizado.'
     });
 
   } catch (error) {
     console.error(error);
     res.status(500).json({
-      error: 'Error actualizando perfil'
+      error: 'Error actualizando perfil.'
     });
   }
 });
-
-/* ==========================
-   ACTIVIDAD RECIENTE PERFIL
-========================== */
 
 app.get('/api/perfil/:id/actividad', async (req, res) => {
   const idUsuario = req.params.id;
@@ -965,34 +718,44 @@ app.get('/api/perfil/:id/actividad', async (req, res) => {
   } catch (error) {
     console.error(error);
     res.status(500).json({
-      error: 'Error cargando actividad'
+      error: 'Error cargando actividad.'
     });
   }
 });
-});
 
-app.put('/api/perfil/:id', async (req, res) => {
-  const idUsuario = req.params.id;
-  const { biografia, intereses } = req.body;
+/* ==========================
+   OWNER / ADMIN
+========================== */
 
+app.get('/api/owner/usuarios', async (req, res) => {
   try {
-    await pool.query(
-      `UPDATE public.usuario SET biografia = $1 WHERE id_usuario = $2`,
-      [biografia, idUsuario]
-    );
+    const queryDueno = `
+      SELECT
+        u.id_usuario,
+        u.nombre,
+        u.email,
+        CASE
+          WHEN o.id_usuario IS NOT NULL THEN TRUE
+          ELSE FALSE
+        END AS es_organizador
+      FROM public.usuario u
+      LEFT JOIN public.organizador o
+        ON u.id_usuario = o.id_usuario
+      ORDER BY u.id_usuario ASC
+    `;
 
-    await pool.query(
-      `UPDATE public.participante SET intereses = $1 WHERE id_usuario = $2`,
-      [intereses, idUsuario]
-    );
+    const resultado = await pool.query(queryDueno);
 
-    res.json({ success: true, message: 'Perfil actualizado' });
+    res.json(resultado.rows);
 
-  } catch (error) {
-    console.error('ERROR EDITAR PERFIL:', error);
-    res.status(500).json({ error: 'Error actualizando perfil' });
+  } catch (err) {
+    console.error(err.stack);
+    res.status(500).json({
+      error: 'Error en la consola del dueño.'
+    });
   }
 });
+
 /* ==========================
    SERVER
 ========================== */
