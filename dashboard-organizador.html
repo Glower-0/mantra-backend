@@ -423,6 +423,15 @@ reader.readAsDataURL(file);
 form.addEventListener('submit', async e => {
 e.preventDefault();
 
+const btnPublicar = document.getElementById('btnPublicar');
+
+if(btnPublicar.disabled){
+return;
+}
+
+btnPublicar.disabled = true;
+btnPublicar.innerText = 'Publicando...';
+
 const formData = new FormData();
 
 formData.append('titulo', document.getElementById('titulo').value);
@@ -451,6 +460,10 @@ const data = await response.json();
 if(!response.ok){
 message.style.color = '#ff5a5a';
 message.innerText = data.error || 'Error al publicar evento';
+
+btnPublicar.disabled = false;
+btnPublicar.innerText = 'Publicar evento';
+
 return;
 }
 
@@ -460,6 +473,22 @@ message.innerText = 'Evento publicado correctamente 🎉';
 form.reset();
 preview.innerHTML = 'Vista previa del promocional';
 
+await cargarEventos();
+await cargarMetricas();
+
+btnPublicar.disabled = false;
+btnPublicar.innerText = 'Publicar evento';
+
+}catch(error){
+console.error(error);
+message.style.color = '#ff5a5a';
+message.innerText = 'Error de conexión';
+
+btnPublicar.disabled = false;
+btnPublicar.innerText = 'Publicar evento';
+}
+});
+  
 cargarEventos();
 cargarMetricas();
 
