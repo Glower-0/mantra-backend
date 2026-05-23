@@ -3,862 +3,402 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
 <title>MANTRA | Feed Eventos</title>
-
 <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
 
 <style>
-
-*{
-margin:0;
-padding:0;
-box-sizing:border-box;
-font-family:'Poppins',sans-serif;
-}
-
-body{
-background:#07070a;
-color:white;
-min-height:100vh;
-}
-
-/* NAVBAR */
-
-.navbar{
-display:flex;
-justify-content:space-between;
-align-items:center;
-padding:22px 7%;
-background:rgba(12,12,18,.95);
-border-bottom:1px solid rgba(255,255,255,.08);
-position:sticky;
-top:0;
-z-index:10;
-}
-
-.logo{
-font-size:1.9rem;
-font-weight:800;
-letter-spacing:2px;
-color:#00bfff;
-}
-
-.user-box{
-display:flex;
-align-items:center;
-gap:15px;
-}
-
-.logout{
-padding:10px 18px;
-border:none;
-border-radius:14px;
-background:#ff4d4d;
-color:white;
-font-weight:600;
-cursor:pointer;
-}
-
-/* HERO */
-
-.hero{
-padding:60px 7% 30px;
-}
-
-.hero h1{
-font-size:3rem;
-margin-bottom:12px;
-}
-
-.hero p{
-color:#aaa;
-font-size:1.05rem;
-}
-
-/* GRID */
-
-.events-grid{
-padding:20px 7% 60px;
-display:grid;
-grid-template-columns:
-repeat(auto-fill,minmax(320px,1fr));
-gap:28px;
-}
-
-/* CARD */
-
-.event-card{
-background:#12121a;
-border:1px solid rgba(255,255,255,.08);
-border-radius:28px;
-overflow:hidden;
-transition:.35s;
-display:flex;
-flex-direction:column;
-}
-
-.event-card:hover{
-transform:translateY(-7px);
-border-color:#00bfff;
-}
-
-.event-image{
-height:220px;
-background:#1c1c26;
-display:flex;
-justify-content:center;
-align-items:center;
-overflow:hidden;
-}
-
-.event-image img{
-width:100%;
-height:100%;
-object-fit:cover;
-}
-
-.no-image{
-color:#777;
-font-size:.95rem;
-}
-
-.event-content{
-padding:24px;
-display:flex;
-flex-direction:column;
-flex:1;
-}
-
-.category{
-display:inline-block;
-padding:8px 14px;
-background:rgba(0,191,255,.15);
-border:1px solid rgba(0,191,255,.3);
-border-radius:50px;
-font-size:.82rem;
-margin-bottom:14px;
-color:#00bfff;
-width:max-content;
-}
-
-.event-title{
-font-size:1.45rem;
-font-weight:700;
-margin-bottom:15px;
-}
-
-.event-info{
-color:#aaa;
-font-size:.95rem;
-margin-bottom:10px;
-}
-
-.attend-btn{
-margin-top:auto;
-padding:15px;
-border:none;
-border-radius:18px;
-background:linear-gradient(135deg,#00bfff,#7c3aed);
-color:white;
-font-weight:700;
-font-size:1rem;
-cursor:pointer;
-transition:.3s;
-}
-
-.attend-btn:hover{
-transform:translateY(-2px);
-}
-
-.loading{
-padding:40px;
-text-align:center;
-color:#888;
-font-size:1.1rem;
-}
-
-.empty{
-padding:40px;
-text-align:center;
-color:#888;
-}
-
-@media(max-width:768px){
-
-.hero h1{
-font-size:2.2rem;
-}
-
-.events-grid{
-grid-template-columns:1fr;
-}
-
-}
-
+*{margin:0;padding:0;box-sizing:border-box;font-family:'Poppins',sans-serif;}
+body{background:#07070a;color:white;min-height:100vh;}
+.navbar{display:flex;justify-content:space-between;align-items:center;padding:22px 7%;background:rgba(12,12,18,.95);border-bottom:1px solid rgba(255,255,255,.08);position:sticky;top:0;z-index:10;}
+.logo{font-size:1.9rem;font-weight:800;letter-spacing:2px;color:#00bfff;}
+.user-box{display:flex;align-items:center;gap:15px;}
+.logout{padding:10px 18px;border:none;border-radius:14px;background:#ff4d4d;color:white;font-weight:600;cursor:pointer;}
+.hero{padding:60px 7% 30px;}
+.hero h1{font-size:3rem;margin-bottom:12px;}
+.hero p{color:#aaa;font-size:1.05rem;}
+.events-grid{padding:20px 7% 60px;display:grid;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));gap:28px;}
+.event-card{background:#12121a;border:1px solid rgba(255,255,255,.08);border-radius:28px;overflow:hidden;transition:.35s;display:flex;flex-direction:column;}
+.event-card:hover{transform:translateY(-7px);border-color:#00bfff;}
+.event-image{height:220px;background:#1c1c26;display:flex;justify-content:center;align-items:center;overflow:hidden;}
+.event-image img{width:100%;height:100%;object-fit:cover;}
+.no-image{color:#777;font-size:.95rem;}
+.event-content{padding:24px;display:flex;flex-direction:column;flex:1;}
+.category{display:inline-block;padding:8px 14px;background:rgba(0,191,255,.15);border:1px solid rgba(0,191,255,.3);border-radius:50px;font-size:.82rem;margin-bottom:14px;color:#00bfff;width:max-content;}
+.event-title{font-size:1.45rem;font-weight:700;margin-bottom:15px;}
+.event-info{color:#aaa;font-size:.95rem;margin-bottom:10px;}
+.attend-btn{padding:13px;border:none;border-radius:16px;background:linear-gradient(135deg,#00bfff,#7c3aed);color:white;font-weight:700;font-size:.95rem;cursor:pointer;transition:.3s;}
+.attend-btn:hover{transform:translateY(-2px);}
+.loading,.empty{padding:40px;text-align:center;color:#888;}
+.modal-bg{position:fixed;inset:0;background:rgba(0,0,0,.75);display:none;justify-content:center;align-items:center;z-index:999;padding:20px;}
+.modal-box{width:100%;max-width:650px;max-height:90vh;overflow:auto;background:#11111a;border-radius:30px;padding:30px;border:1px solid rgba(255,255,255,.08);}
+.modal-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:25px;}
+.close-btn{background:none;border:none;color:white;font-size:1.6rem;cursor:pointer;}
+@media(max-width:768px){.hero h1{font-size:2.2rem;}.events-grid{grid-template-columns:1fr;}.user-box{flex-wrap:wrap;}}
 </style>
 </head>
 
 <body>
 
 <nav class="navbar">
-
-<div class="logo">
-MANTRA
-</div>
-<div class="user-box">
-
-<span id="userName">
-Usuario
-</span>
-
-<button
-class="logout"
-style="
-background:#1d1d29;
-"
-onclick="window.location.href='perfil.html'"
->
-Mi perfil
-</button>
-
-<button
-class="logout"
-onclick="logout()"
->
-Cerrar sesión
-</button>
-
-</div>
-
+  <div class="logo">MANTRA</div>
+  <div class="user-box">
+    <span id="userName">Usuario</span>
+    <button class="logout" style="background:#1d1d29;" onclick="window.location.href='perfil.html'">Mi perfil</button>
+    <button class="logout" onclick="logout()">Cerrar sesión</button>
+  </div>
 </nav>
 
 <section class="hero">
-
-<h1>
-Descubre eventos increíbles 🔥
-</h1>
-
-<p>
-Eventos personalizados según tus gustos y recomendaciones.
-</p>
-
+  <h1>Descubre eventos increíbles 🔥</h1>
+  <p>Eventos personalizados según tus gustos y recomendaciones.</p>
 </section>
 
-<section
-class="events-grid"
-id="eventsGrid"
->
-
-<div class="loading">
-Cargando eventos...
-</div>
-
+<section class="events-grid" id="eventsGrid">
+  <div class="loading">Cargando eventos...</div>
 </section>
-   <!-- MODAL RESEÑAS -->
 
-<div
-id="resenaModal"
-style="
-position:fixed;
-top:0;
-left:0;
-width:100%;
-height:100%;
-background:rgba(0,0,0,.75);
-display:none;
-justify-content:center;
-align-items:center;
-z-index:999;
-padding:20px;
-"
->
+<!-- MODAL RESEÑAS -->
+<div id="resenaModal" class="modal-bg">
+  <div class="modal-box">
+    <div class="modal-head">
+      <h2 id="modalTitulo">Reseñas</h2>
+      <button onclick="cerrarResenas()" class="close-btn">✕</button>
+    </div>
 
-<div
-style="
-width:100%;
-max-width:650px;
-max-height:90vh;
-overflow:auto;
-background:#11111a;
-border-radius:30px;
-padding:30px;
-border:1px solid rgba(255,255,255,.08);
-"
->
+    <div id="listaResenas" style="margin-bottom:25px;"></div>
 
-<div
-style="
-display:flex;
-justify-content:space-between;
-align-items:center;
-margin-bottom:25px;
-"
->
+    <div style="border-top:1px solid rgba(255,255,255,.08);padding-top:25px;">
+      <h3 style="margin-bottom:18px;">Dejar reseña</h3>
 
-<h2 id="modalTitulo">
-Reseñas
-</h2>
+      <select id="calificacion" style="width:100%;padding:14px;border:none;border-radius:14px;background:#1d1d29;color:white;margin-bottom:15px;">
+        <option value="5">⭐⭐⭐⭐⭐ 5</option>
+        <option value="4">⭐⭐⭐⭐ 4</option>
+        <option value="3">⭐⭐⭐ 3</option>
+        <option value="2">⭐⭐ 2</option>
+        <option value="1">⭐ 1</option>
+      </select>
 
-<button
-onclick="cerrarResenas()"
-style="
-background:none;
-border:none;
-color:white;
-font-size:1.6rem;
-cursor:pointer;
-"
->
-✕
-</button>
+      <textarea id="comentario" placeholder="Escribe tu experiencia..." style="width:100%;height:120px;padding:15px;border:none;border-radius:16px;background:#1d1d29;color:white;resize:none;margin-bottom:15px;"></textarea>
 
+      <button onclick="publicarResena()" style="width:100%;padding:15px;border:none;border-radius:16px;background:linear-gradient(135deg,#00bfff,#7c3aed);color:white;font-weight:700;cursor:pointer;">
+        Publicar reseña
+      </button>
+    </div>
+  </div>
 </div>
 
-<div
-id="listaResenas"
-style="
-margin-bottom:25px;
-"
->
+<!-- MODAL COMENTARIOS -->
+<div id="comentariosModal" class="modal-bg">
+  <div class="modal-box">
+    <div class="modal-head">
+      <h2 id="comentariosTitulo">Comentarios</h2>
+      <button onclick="cerrarComentarios()" class="close-btn">✕</button>
+    </div>
+
+    <div id="listaComentarios" style="margin-bottom:25px;"></div>
+
+    <textarea id="comentarioTexto" placeholder="Escribe un comentario..." style="width:100%;height:100px;padding:15px;border:none;border-radius:16px;background:#1d1d29;color:white;resize:none;margin-bottom:15px;"></textarea>
+
+    <button onclick="publicarComentario()" style="width:100%;padding:15px;border:none;border-radius:16px;background:linear-gradient(135deg,#00bfff,#7c3aed);color:white;font-weight:700;cursor:pointer;">
+      Publicar comentario
+    </button>
+  </div>
 </div>
 
-<div
-style="
-border-top:1px solid rgba(255,255,255,.08);
-padding-top:25px;
-"
->
-
-<h3
-style="
-margin-bottom:18px;
-"
->
-Dejar reseña
-</h3>
-
-<select
-id="calificacion"
-style="
-width:100%;
-padding:14px;
-border:none;
-border-radius:14px;
-background:#1d1d29;
-color:white;
-margin-bottom:15px;
-"
->
-<option value="5">⭐⭐⭐⭐⭐ 5</option>
-<option value="4">⭐⭐⭐⭐ 4</option>
-<option value="3">⭐⭐⭐ 3</option>
-<option value="2">⭐⭐ 2</option>
-<option value="1">⭐ 1</option>
-</select>
-
-<textarea
-id="comentario"
-placeholder="Escribe tu experiencia..."
-style="
-width:100%;
-height:120px;
-padding:15px;
-border:none;
-border-radius:16px;
-background:#1d1d29;
-color:white;
-resize:none;
-margin-bottom:15px;
-"
-></textarea>
-
-<button
-onclick="publicarResena()"
-style="
-width:100%;
-padding:15px;
-border:none;
-border-radius:16px;
-background:linear-gradient(135deg,#00bfff,#7c3aed);
-color:white;
-font-weight:700;
-cursor:pointer;
-"
->
-Publicar reseña
-</button>
-
-</div>
-
-</div>
-
-</div>
 <script>
-
-/* ==========================
-   VALIDAR SESIÓN
-========================== */
-
-const usuario =
-JSON.parse(
-localStorage.getItem(
-'usuarioMantra'
-)
-);
+const usuario = JSON.parse(localStorage.getItem('usuarioMantra'));
 
 if(!usuario){
-
-window.location.href =
-'index.html';
-
+  window.location.href = 'index.html';
 }
 
-document.getElementById(
-'userName'
-).innerText =
-usuario.nombre;
-
-/* ==========================
-   CARGAR EVENTOS
-========================== */
+document.getElementById('userName').innerText = usuario.nombre;
 
 async function cargarEventos(){
+  try{
+    const response = await fetch('/api/feed');
+    const eventos = await response.json();
 
-try{
+    const grid = document.getElementById('eventsGrid');
+    grid.innerHTML = '';
 
-const response =
-await fetch('/api/feed');
+    if(eventos.length === 0){
+      grid.innerHTML = '<div class="empty">No hay eventos disponibles.</div>';
+      return;
+    }
 
-const eventos =
-await response.json();
+    eventos.forEach(evento=>{
+      const card = document.createElement('div');
+      card.className = 'event-card';
 
-const grid =
-document.getElementById(
-'eventsGrid'
-);
+      const fecha = evento.fecha
+        ? new Date(evento.fecha).toLocaleDateString('es-MX')
+        : 'Sin fecha';
 
-grid.innerHTML = '';
+      const tituloSeguro = String(evento.titulo || '').replace(/'/g, "\\'");
 
-if(eventos.length === 0){
+      card.innerHTML = `
+        <div class="event-image">
+          ${evento.imagen_url
+            ? `<img src="${evento.imagen_url}" alt="${evento.titulo}">`
+            : `<div class="no-image">Sin promocional</div>`}
+        </div>
 
-grid.innerHTML =
-`
-<div class="empty">
-No hay eventos disponibles.
-</div>
-`;
+        <div class="event-content">
+          <div class="category">${evento.nombre_cat || 'General'}</div>
+          <div class="event-title">${evento.titulo}</div>
+          <div class="event-info">📅 ${fecha}</div>
+          <div class="event-info">🕒 ${evento.hora || ''}</div>
+          <div class="event-info">📍 ${evento.calle || ''}</div>
+          <div class="event-info">🌎 ${evento.ciudad || ''}</div>
 
-return;
+          <div style="display:flex;gap:10px;margin-top:auto;flex-wrap:wrap;">
+            <button class="attend-btn" onclick="confirmarAsistencia(${evento.id_evento})" style="flex:1;">Asistir</button>
 
+            <button class="attend-btn" onclick="abrirResenas(${evento.id_evento}, '${tituloSeguro}')" style="flex:1;background:#1f1f2c;border:1px solid rgba(255,255,255,.08);">
+              ⭐ Reseñas
+            </button>
+
+            <button class="attend-btn" onclick="seguirOrganizador(${evento.id_organizador})" style="flex:1;background:#1f1f2c;border:1px solid rgba(255,255,255,.08);">
+              Seguir
+            </button>
+
+            <button class="attend-btn" onclick="abrirComentarios(${evento.id_evento}, '${tituloSeguro}')" style="flex:1;background:#1f1f2c;border:1px solid rgba(255,255,255,.08);">
+              💬 Comentar
+            </button>
+          </div>
+        </div>
+      `;
+
+      grid.appendChild(card);
+    });
+
+  }catch(error){
+    console.error(error);
+    document.getElementById('eventsGrid').innerHTML =
+    '<div class="empty">Error cargando eventos.</div>';
+  }
 }
 
-eventos.forEach(evento=>{
+async function confirmarAsistencia(idEvento){
+  try{
+    const response = await fetch('/api/asistencia',{
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({
+        id_usuario: usuario.id_usuario,
+        id_evento: idEvento
+      })
+    });
 
-const card =
-document.createElement('div');
+    const data = await response.json();
 
-card.className =
-'event-card';
+    if(!response.ok){
+      alert(data.error || 'Error');
+      return;
+    }
 
-const fecha =
-evento.fecha
-? new Date(evento.fecha)
-.toLocaleDateString(
-'es-MX'
-)
-: 'Sin fecha';
+    alert('🎉 Asistencia confirmada');
 
-card.innerHTML =
-`
-<div class="event-image">
-
-${
-evento.imagen_url
-
-? `<img src="${evento.imagen_url}" alt="${evento.titulo}">`
-
-: `<div class="no-image">
-Sin promocional
-</div>`
+  }catch(error){
+    console.error(error);
+    alert('Error de conexión');
+  }
 }
-
-</div>
-
-<div class="event-content">
-
-<div class="category">
-${evento.nombre_cat || 'General'}
-</div>
-
-<div class="event-title">
-${evento.titulo}
-</div>
-
-<div class="event-info">
-📅 ${fecha}
-</div>
-
-<div class="event-info">
-🕒 ${evento.hora || ''}
-</div>
-
-<div class="event-info">
-📍 ${evento.calle || ''}
-</div>
-
-<div class="event-info">
-🌎 ${evento.ciudad || ''}
-</div>
-
-<button
-<div style="display:flex;gap:10px;margin-top:auto;">
-
-<button
-class="attend-btn"
-onclick="confirmarAsistencia(${evento.id_evento})"
-style="flex:1;"
->
-Asistir
-</button>
-
-<button
-class="attend-btn"
-onclick="abrirResenas(${evento.id_evento}, '${evento.titulo}')"
-style="
-flex:1;
-background:#1f1f2c;
-border:1px solid rgba(255,255,255,.08);
-"
->
-⭐ Reseñas
-</button>
-
-</div>
-</button>
-
-</div>
-`;
-
-grid.appendChild(card);
-
-});
-
-}catch(error){
-
-console.error(error);
-
-document.getElementById(
-'eventsGrid'
-).innerHTML =
-`
-<div class="empty">
-Error cargando eventos.
-</div>
-`;
-
-}
-
-}
-
-/* ==========================
-   ASISTENCIA
-========================== */
-
-async function confirmarAsistencia(
-idEvento
-){
-
-try{
-
-const response =
-await fetch(
-'/api/asistencia',
-{
-
-method:'POST',
-
-headers:{
-'Content-Type':
-'application/json'
-},
-
-body:JSON.stringify({
-
-id_usuario:
-usuario.id_usuario,
-
-id_evento:
-idEvento
-
-})
-
-}
-);
-
-const data =
-await response.json();
-
-if(!response.ok){
-
-alert(
-data.error ||
-'Error'
-);
-
-return;
-
-}
-
-alert(
-'🎉 Asistencia confirmada'
-);
-
-}catch(error){
-
-console.error(error);
-
-alert(
-'Error de conexión'
-);
-
-}
-
-}
-
-/* ==========================
-   LOGOUT
-========================== */
-
-function logout(){
-
-localStorage.removeItem(
-'usuarioMantra'
-);
-
-window.location.href =
-'index.html';
-
-}
-/* ==========================
-   MODAL RESEÑAS
-========================== */
 
 let eventoActual = null;
 
-async function abrirResenas(
-idEvento,
-titulo
-){
-
-eventoActual = idEvento;
-
-document.getElementById(
-'modalTitulo'
-).innerText =
-`⭐ ${titulo}`;
-
-document.getElementById(
-'resenaModal'
-).style.display =
-'flex';
-
-cargarResenas(idEvento);
-
+function abrirResenas(idEvento,titulo){
+  eventoActual = idEvento;
+  document.getElementById('modalTitulo').innerText = `⭐ ${titulo}`;
+  document.getElementById('resenaModal').style.display = 'flex';
+  cargarResenas(idEvento);
 }
 
 function cerrarResenas(){
-
-document.getElementById(
-'resenaModal'
-).style.display =
-'none';
-
+  document.getElementById('resenaModal').style.display = 'none';
 }
 
-/* ==========================
-   CARGAR RESEÑAS
-========================== */
+async function cargarResenas(idEvento){
+  try{
+    const response = await fetch(`/api/resenas/${idEvento}`);
+    const resenas = await response.json();
+    const lista = document.getElementById('listaResenas');
 
-async function cargarResenas(
-idEvento
-){
+    lista.innerHTML = '';
 
-try{
+    if(resenas.length === 0){
+      lista.innerHTML = '<p style="color:#888;">Aún no hay reseñas.</p>';
+      return;
+    }
 
-const response =
-await fetch(
-`/api/resenas/${idEvento}`
-);
+    resenas.forEach(resena=>{
+      const div = document.createElement('div');
+      div.style = 'background:#1a1a25;padding:18px;border-radius:18px;margin-bottom:15px;border:1px solid rgba(255,255,255,.05);';
 
-const resenas =
-await response.json();
+      div.innerHTML = `
+        <div style="display:flex;justify-content:space-between;margin-bottom:10px;">
+          <strong>${resena.nombre}</strong>
+          <span style="color:#FFD700;">${'⭐'.repeat(resena.calificacion)}</span>
+        </div>
+        <p style="color:#ccc;margin-bottom:10px;">${resena.comentario}</p>
+        <small style="color:#777;">${new Date(resena.fecha_publicacion).toLocaleDateString('es-MX')}</small>
+      `;
 
-const lista =
-document.getElementById(
-'listaResenas'
-);
+      lista.appendChild(div);
+    });
 
-lista.innerHTML = '';
-
-if(resenas.length === 0){
-
-lista.innerHTML =
-`
-<p style="color:#888;">
-Aún no hay reseñas.
-</p>
-`;
-
-return;
-
+  }catch(error){
+    console.error(error);
+  }
 }
-
-resenas.forEach(resena=>{
-
-const div =
-document.createElement('div');
-
-div.style =
-`
-background:#1a1a25;
-padding:18px;
-border-radius:18px;
-margin-bottom:15px;
-border:1px solid rgba(255,255,255,.05);
-`;
-
-div.innerHTML =
-`
-<div style="
-display:flex;
-justify-content:space-between;
-margin-bottom:10px;
-">
-
-<strong>
-${resena.nombre}
-</strong>
-
-<span style="color:#FFD700;">
-${'⭐'.repeat(resena.calificacion)}
-</span>
-
-</div>
-
-<p style="
-color:#ccc;
-margin-bottom:10px;
-">
-${resena.comentario}
-</p>
-
-<small style="color:#777;">
-${new Date(
-resena.fecha_publicacion
-).toLocaleDateString('es-MX')}
-</small>
-`;
-
-lista.appendChild(div);
-
-});
-
-}catch(error){
-
-console.error(error);
-
-}
-
-}
-
-/* ==========================
-   PUBLICAR RESEÑA
-========================== */
 
 async function publicarResena(){
+  try{
+    const calificacion = document.getElementById('calificacion').value;
+    const comentario = document.getElementById('comentario').value;
 
-try{
+    const response = await fetch('/api/resenas',{
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({
+        calificacion,
+        comentario,
+        id_evento: eventoActual,
+        id_participante: usuario.id_usuario
+      })
+    });
 
-const calificacion =
-document.getElementById(
-'calificacion'
-).value;
+    const data = await response.json();
 
-const comentario =
-document.getElementById(
-'comentario'
-).value;
+    if(!response.ok){
+      alert(data.error || 'Error');
+      return;
+    }
 
-const response =
-await fetch(
-'/api/resenas',
-{
+    document.getElementById('comentario').value = '';
+    cargarResenas(eventoActual);
+    alert('⭐ Reseña publicada');
 
-method:'POST',
-
-headers:{
-'Content-Type':
-'application/json'
-},
-
-body:JSON.stringify({
-
-calificacion,
-comentario,
-
-id_evento:
-eventoActual,
-
-id_participante:
-usuario.id_usuario
-
-})
-
-}
-);
-
-const data =
-await response.json();
-
-if(!response.ok){
-
-alert(
-data.error ||
-'Error'
-);
-
-return;
-
+  }catch(error){
+    console.error(error);
+    alert('Error de conexión');
+  }
 }
 
-document.getElementById(
-'comentario'
-).value = '';
+async function seguirOrganizador(idOrganizador){
+  if(!idOrganizador){
+    alert('No se encontró el organizador del evento.');
+    return;
+  }
 
-cargarResenas(eventoActual);
+  try{
+    const response = await fetch('/api/seguir-organizador',{
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({
+        id_participante: usuario.id_usuario,
+        id_organizador: idOrganizador
+      })
+    });
 
-alert(
-'⭐ Reseña publicada'
-);
+    const data = await response.json();
 
-}catch(error){
+    if(!response.ok){
+      alert(data.error || 'Error');
+      return;
+    }
 
-console.error(error);
+    alert('Ahora sigues a este organizador');
 
-alert(
-'Error de conexión'
-);
-
+  }catch(error){
+    console.error(error);
+    alert('Error de conexión');
+  }
 }
 
+let eventoComentarioActual = null;
+
+function abrirComentarios(idEvento,titulo){
+  eventoComentarioActual = idEvento;
+  document.getElementById('comentariosTitulo').innerText = `💬 ${titulo}`;
+  document.getElementById('comentariosModal').style.display = 'flex';
+  cargarComentarios(idEvento);
 }
-/* ==========================
-   INIT
-========================== */
+
+function cerrarComentarios(){
+  document.getElementById('comentariosModal').style.display = 'none';
+}
+
+async function cargarComentarios(idEvento){
+  try{
+    const response = await fetch(`/api/comentarios/${idEvento}`);
+    const comentarios = await response.json();
+    const lista = document.getElementById('listaComentarios');
+
+    lista.innerHTML = '';
+
+    if(comentarios.length === 0){
+      lista.innerHTML = '<p style="color:#888;">Aún no hay comentarios.</p>';
+      return;
+    }
+
+    comentarios.forEach(comentario=>{
+      lista.innerHTML += `
+        <div style="background:#1a1a25;padding:16px;border-radius:18px;margin-bottom:12px;border:1px solid rgba(255,255,255,.05);">
+          <strong>${comentario.nombre}</strong>
+          <p style="color:#ccc;margin:8px 0;">${comentario.comentario}</p>
+          <small style="color:#777;">${new Date(comentario.fecha_publicacion).toLocaleDateString('es-MX')}</small>
+        </div>
+      `;
+    });
+
+  }catch(error){
+    console.error(error);
+  }
+}
+
+async function publicarComentario(){
+  const texto = document.getElementById('comentarioTexto').value.trim();
+
+  if(!texto){
+    alert('Escribe un comentario.');
+    return;
+  }
+
+  try{
+    const response = await fetch('/api/comentarios',{
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({
+        comentario: texto,
+        id_evento: eventoComentarioActual,
+        id_participante: usuario.id_usuario
+      })
+    });
+
+    const data = await response.json();
+
+    if(!response.ok){
+      alert(data.error || 'Error');
+      return;
+    }
+
+    document.getElementById('comentarioTexto').value = '';
+    cargarComentarios(eventoComentarioActual);
+
+  }catch(error){
+    console.error(error);
+    alert('Error de conexión');
+  }
+}
+
+function logout(){
+  localStorage.removeItem('usuarioMantra');
+  window.location.href = 'index.html';
+}
 
 cargarEventos();
-
 </script>
 
 </body>
