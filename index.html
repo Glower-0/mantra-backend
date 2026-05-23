@@ -410,18 +410,15 @@ return;
 
 }
 
-/* ======================
-GUARDAR SESIÓN
-====================== */
+
+
 
 localStorage.setItem(
 'usuarioMantra',
 JSON.stringify(data.usuario)
 );
 
-/* ======================
-REDIRECCIÓN POR ROL
-====================== */
+
 
 if(data.usuario.rol === 'owner'){
 
