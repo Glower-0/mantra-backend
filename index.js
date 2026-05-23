@@ -272,6 +272,7 @@ app.get('/api/feed', async (req, res) => {
         e.calle,
         e.ciudad,
         e.imagen_url,
+        e.id_organizador,
         c.nombre_cat
       FROM public.evento e
       LEFT JOIN public.evento_categoria ec
@@ -753,6 +754,113 @@ app.get('/api/owner/usuarios', async (req, res) => {
     res.status(500).json({
       error: 'Error en la consola del dueño.'
     });
+  }
+});
+
+/* ==========================
+   SEGUIR ORGANIZADOR
+========================== */
+
+app.post('/api/seguir-organizador', async (req, res) => {
+  const { id_participante, id_organizador } = req.body;
+
+  try {
+    await pool.query(
+      `
+      INSERT INTO public.seguidor_organizador
+      (id_participante, id_organizador)
+      VALUES ($1, $2)
+      ON CONFLICT DO NOTHING
+      `,
+      [id_participante, id_organizador]
+    );
+
+    res.json({ success: true, message: 'Organizador seguido.' });
+
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: 'Error siguiendo organizador.' });
+  }
+});
+
+app.delete('/api/seguir-organizador', async (req, res) => {
+  const { id_participante, id_organizador } = req.body;
+
+  try {
+    await pool.query(
+      `
+      DELETE FROM public.seguidor_organizador
+      WHERE id_participante = $1
+      AND id_organizador = $2
+      `,
+      [id_participante, id_organizador]
+    );
+
+    res.json({ success: true, message: 'Dejaste de seguir al organizador.' });
+
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: 'Error dejando de seguir.' });
+  }
+});
+
+/* ==========================
+   COMENTARIOS EVENTO
+========================== */
+
+app.post('/api/comentarios', async (req, res) => {
+  const { comentario, id_evento, id_participante } = req.body;
+
+  try {
+    const nextId = await pool.query(
+      `SELECT COALESCE(MAX(id_comentario), 0) + 1 AS id FROM public.comentario_evento`
+    );
+
+    const idComentario = nextId.rows[0].id;
+
+    await pool.query(
+      `
+      INSERT INTO public.comentario_evento
+      (id_comentario, comentario, fecha_publicacion, id_evento, id_participante)
+      VALUES ($1, $2, CURRENT_DATE, $3, $4)
+      `,
+      [idComentario, comentario, id_evento, id_participante]
+    );
+
+    res.json({ success: true, message: 'Comentario publicado.' });
+
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: 'Error publicando comentario.' });
+  }
+});
+
+app.get('/api/comentarios/:idEvento', async (req, res) => {
+  const idEvento = req.params.idEvento;
+
+  try {
+    const comentarios = await pool.query(
+      `
+      SELECT
+        c.id_comentario,
+        c.comentario,
+        c.fecha_publicacion,
+        u.nombre,
+        u.foto_perfil
+      FROM public.comentario_evento c
+      JOIN public.usuario u
+        ON c.id_participante = u.id_usuario
+      WHERE c.id_evento = $1
+      ORDER BY c.fecha_publicacion DESC, c.id_comentario DESC
+      `,
+      [idEvento]
+    );
+
+    res.json(comentarios.rows);
+
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: 'Error obteniendo comentarios.' });
   }
 });
 
