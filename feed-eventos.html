@@ -372,11 +372,22 @@ async function cargarComentarios(idEvento){
 
     comentarios.forEach(comentario=>{
       lista.innerHTML += `
-        <div style="background:#1a1a25;padding:16px;border-radius:18px;margin-bottom:12px;border:1px solid rgba(255,255,255,.05);">
-          <strong>${comentario.nombre}</strong>
-          <p style="color:#ccc;margin:8px 0;">${comentario.comentario}</p>
-          <small style="color:#777;">${new Date(comentario.fecha_publicacion).toLocaleDateString('es-MX')}</small>
-        </div>
+        <div style="display:flex;justify-content:space-between;align-items:center;">
+  <strong>${com.nombre}</strong>
+
+  <button
+    onclick="agregarAmigo(${com.id_usuario})"
+    style="
+      background:#00bfff;
+      border:none;
+      color:white;
+      padding:6px 10px;
+      border-radius:10px;
+      cursor:pointer;
+    ">
+    ➕ Amigo
+  </button>
+</div>
       `;
     });
 
