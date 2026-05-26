@@ -272,7 +272,33 @@ async function cargarLogros(){
     console.error(error);
   }
 }
+  
+async function iniciarChat(idAmigo){
+  try{
+    const response = await fetch('/api/chat/iniciar',{
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({
+        id_usuario_1: usuario.id_usuario,
+        id_usuario_2: idAmigo
+      })
+    });
 
+    const data = await response.json();
+
+    if(!response.ok){
+      alert(data.error || 'Error iniciando chat');
+      return;
+    }
+
+    window.location.href = 'chat.html';
+
+  }catch(error){
+    console.error(error);
+    alert('Error de conexión');
+  }
+}
+  
 function logout(){
   localStorage.removeItem('usuarioMantra');
   window.location.href = 'index.html';
