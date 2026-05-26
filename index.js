@@ -273,6 +273,7 @@ app.get('/api/feed', async (req, res) => {
         e.ciudad,
         e.imagen_url,
         e.id_organizador,
+        u.id_usuario,
         c.nombre_cat
       FROM public.evento e
       LEFT JOIN public.evento_categoria ec
