@@ -1,3 +1,260 @@
-<button onclick="window.location.href='social.html'">
-Social
-</button>
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MANTRA | Social</title>
+
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+
+<style>
+*{margin:0;padding:0;box-sizing:border-box;font-family:'Poppins',sans-serif;}
+body{background:#07070a;color:white;min-height:100vh;}
+.navbar{display:flex;justify-content:space-between;align-items:center;padding:22px 7%;background:#0f0f16;border-bottom:1px solid rgba(255,255,255,.08);}
+.logo{font-size:1.9rem;font-weight:800;color:#00bfff;}
+.nav-actions{display:flex;gap:12px;flex-wrap:wrap;}
+.nav-btn{padding:10px 16px;border:none;border-radius:14px;background:#1d1d29;color:white;font-weight:600;cursor:pointer;}
+.logout{background:#ff4d4d;}
+.container{max-width:1100px;margin:40px auto;padding:0 20px;}
+h1{font-size:2.6rem;margin-bottom:8px;}
+.subtitle{color:#aaa;margin-bottom:30px;}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:25px;}
+.card{background:#11111a;border:1px solid rgba(255,255,255,.08);border-radius:26px;padding:25px;}
+.card h2{margin-bottom:18px;}
+.item{background:#1a1a25;border-radius:18px;padding:15px;margin-bottom:12px;}
+.item strong{display:block;margin-bottom:5px;}
+.item p{color:#bbb;}
+.btn{padding:10px 14px;border:none;border-radius:12px;background:#00bfff;color:white;font-weight:700;cursor:pointer;margin-top:10px;}
+.empty{color:#888;}
+.badge{color:#00bfff;font-weight:700;}
+</style>
+</head>
+
+<body>
+
+<nav class="navbar">
+  <div class="logo">MANTRA</div>
+
+  <div class="nav-actions">
+    <button class="nav-btn" onclick="window.location.href='feed-eventos.html'">Feed</button>
+    <button class="nav-btn" onclick="window.location.href='comunidad.html'">Comunidad</button>
+    <button class="nav-btn" onclick="window.location.href='perfil.html'">Perfil</button>
+    <button class="nav-btn logout" onclick="logout()">Salir</button>
+  </div>
+</nav>
+
+<main class="container">
+  <h1>Zona Social</h1>
+  <p class="subtitle">Gestiona amigos, notificaciones y logros dentro de MANTRA.</p>
+
+  <section class="grid">
+
+    <div class="card">
+      <h2>👥 Solicitudes</h2>
+      <div id="solicitudesBox">Cargando...</div>
+    </div>
+
+    <div class="card">
+      <h2>🤝 Mis amigos</h2>
+      <div id="amigosBox">Cargando...</div>
+    </div>
+
+    <div class="card">
+      <h2>🔔 Notificaciones</h2>
+      <div id="notificacionesBox">Cargando...</div>
+    </div>
+
+    <div class="card">
+      <h2>🏆 Logros</h2>
+      <div id="logrosBox">Cargando...</div>
+    </div>
+
+  </section>
+</main>
+
+<script>
+const usuario = JSON.parse(localStorage.getItem('usuarioMantra'));
+
+if(!usuario){
+  window.location.href = 'index.html';
+}
+
+async function cargarSolicitudes(){
+  try{
+    const response = await fetch(`/api/amigos/solicitudes/${usuario.id_usuario}`);
+    const solicitudes = await response.json();
+
+    const box = document.getElementById('solicitudesBox');
+    box.innerHTML = '';
+
+    if(solicitudes.length === 0){
+      box.innerHTML = '<p class="empty">No tienes solicitudes pendientes.</p>';
+      return;
+    }
+
+    solicitudes.forEach(s=>{
+      box.innerHTML += `
+        <div class="item">
+          <strong>${s.nombre}</strong>
+          <p>Quiere agregarte como amigo.</p>
+          <button class="btn" onclick="aceptarSolicitud(${s.id_usuario_1})">
+            Aceptar
+          </button>
+        </div>
+      `;
+    });
+
+  }catch(error){
+    console.error(error);
+  }
+}
+
+async function aceptarSolicitud(idSolicitante){
+  try{
+    const response = await fetch('/api/amigos/aceptar',{
+      method:'PUT',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({
+        id_usuario_1:idSolicitante,
+        id_usuario_2:usuario.id_usuario
+      })
+    });
+
+    const data = await response.json();
+
+    if(!response.ok){
+      alert(data.error || 'Error');
+      return;
+    }
+
+    cargarSolicitudes();
+    cargarAmigos();
+
+  }catch(error){
+    console.error(error);
+    alert('Error de conexión');
+  }
+}
+
+async function cargarAmigos(){
+  try{
+    const response = await fetch(`/api/amigos/${usuario.id_usuario}`);
+    const amigos = await response.json();
+
+    const box = document.getElementById('amigosBox');
+    box.innerHTML = '';
+
+    if(amigos.length === 0){
+      box.innerHTML = '<p class="empty">Aún no tienes amigos.</p>';
+      return;
+    }
+
+    amigos.forEach(a=>{
+      box.innerHTML += `
+        <div class="item">
+          <strong>${a.nombre}</strong>
+          <p>Amigo en MANTRA</p>
+        </div>
+      `;
+    });
+
+  }catch(error){
+    console.error(error);
+  }
+}
+
+async function cargarNotificaciones(){
+  try{
+    const response = await fetch(`/api/notificaciones/${usuario.id_usuario}`);
+    const notificaciones = await response.json();
+
+    const box = document.getElementById('notificacionesBox');
+    box.innerHTML = '';
+
+    if(notificaciones.length === 0){
+      box.innerHTML = '<p class="empty">No tienes notificaciones.</p>';
+      return;
+    }
+
+    notificaciones.forEach(n=>{
+      box.innerHTML += `
+        <div class="item">
+          <strong>${n.leida ? 'Notificación' : 'Nueva 🔵'}</strong>
+          <p>${n.mensaje}</p>
+          <small class="badge">${new Date(n.fecha_creacion).toLocaleDateString('es-MX')}</small>
+          ${!n.leida ? `<br><button class="btn" onclick="marcarLeida(${n.id_notificacion})">Marcar como leída</button>` : ''}
+        </div>
+      `;
+    });
+
+  }catch(error){
+    console.error(error);
+  }
+}
+
+async function marcarLeida(id){
+  try{
+    await fetch(`/api/notificaciones/leer/${id}`,{
+      method:'PUT'
+    });
+
+    cargarNotificaciones();
+
+  }catch(error){
+    console.error(error);
+  }
+}
+
+async function revisarLogros(){
+  try{
+    await fetch(`/api/logros/revisar/${usuario.id_usuario}`,{
+      method:'POST'
+    });
+  }catch(error){
+    console.error(error);
+  }
+}
+
+async function cargarLogros(){
+  try{
+    await revisarLogros();
+
+    const response = await fetch(`/api/logros/${usuario.id_usuario}`);
+    const logros = await response.json();
+
+    const box = document.getElementById('logrosBox');
+    box.innerHTML = '';
+
+    if(logros.length === 0){
+      box.innerHTML = '<p class="empty">Todavía no tienes logros.</p>';
+      return;
+    }
+
+    logros.forEach(l=>{
+      box.innerHTML += `
+        <div class="item">
+          <strong>🏆 ${l.nombre_logro}</strong>
+          <p>${l.descripcion || ''}</p>
+          <small class="badge">${new Date(l.fecha_obtenido).toLocaleDateString('es-MX')}</small>
+        </div>
+      `;
+    });
+
+  }catch(error){
+    console.error(error);
+  }
+}
+
+function logout(){
+  localStorage.removeItem('usuarioMantra');
+  window.location.href = 'index.html';
+}
+
+cargarSolicitudes();
+cargarAmigos();
+cargarNotificaciones();
+cargarLogros();
+</script>
+
+</body>
+</html>
