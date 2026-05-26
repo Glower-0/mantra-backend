@@ -865,6 +865,143 @@ app.get('/api/comentarios/:idEvento', async (req, res) => {
 });
 
 /* ==========================
+   COMUNIDAD
+========================== */
+
+app.post('/api/comunidad/publicar', async (req, res) => {
+  const { contenido, id_usuario, id_evento } = req.body;
+
+  try {
+    const nextId = await pool.query(
+      `SELECT COALESCE(MAX(id_publicacion), 0) + 1 AS id FROM public.publicacion_comunidad`
+    );
+
+    const idPublicacion = nextId.rows[0].id;
+
+    await pool.query(
+      `
+      INSERT INTO public.publicacion_comunidad
+      (id_publicacion, contenido, fecha_publicacion, id_usuario, id_evento)
+      VALUES ($1, $2, CURRENT_DATE, $3, $4)
+      `,
+      [idPublicacion, contenido, id_usuario, id_evento || null]
+    );
+
+    res.json({
+      success: true,
+      message: 'Publicación creada.'
+    });
+
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({
+      error: 'Error creando publicación.'
+    });
+  }
+});
+
+app.get('/api/comunidad/feed', async (req, res) => {
+  try {
+    const publicaciones = await pool.query(
+      `
+      SELECT
+        p.id_publicacion,
+        p.contenido,
+        p.fecha_publicacion,
+        p.id_usuario,
+        u.nombre,
+        u.foto_perfil,
+        e.titulo AS evento_titulo,
+        e.imagen_url AS evento_imagen,
+        CASE
+          WHEN o.id_usuario IS NOT NULL THEN 'organizador'
+          ELSE 'asistidor'
+        END AS rol
+      FROM public.publicacion_comunidad p
+      JOIN public.usuario u
+        ON p.id_usuario = u.id_usuario
+      LEFT JOIN public.organizador o
+        ON u.id_usuario = o.id_usuario
+      LEFT JOIN public.evento e
+        ON p.id_evento = e.id_evento
+      ORDER BY p.id_publicacion DESC
+      `
+    );
+
+    res.json(publicaciones.rows);
+
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({
+      error: 'Error cargando comunidad.'
+    });
+  }
+});
+
+app.post('/api/comunidad/comentar', async (req, res) => {
+  const { comentario, id_publicacion, id_usuario } = req.body;
+
+  try {
+    const nextId = await pool.query(
+      `SELECT COALESCE(MAX(id_comentario), 0) + 1 AS id FROM public.comentario_publicacion`
+    );
+
+    const idComentario = nextId.rows[0].id;
+
+    await pool.query(
+      `
+      INSERT INTO public.comentario_publicacion
+      (id_comentario, comentario, fecha_publicacion, id_publicacion, id_usuario)
+      VALUES ($1, $2, CURRENT_DATE, $3, $4)
+      `,
+      [idComentario, comentario, id_publicacion, id_usuario]
+    );
+
+    res.json({
+      success: true,
+      message: 'Comentario publicado.'
+    });
+
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({
+      error: 'Error comentando publicación.'
+    });
+  }
+});
+
+app.get('/api/comunidad/comentarios/:idPublicacion', async (req, res) => {
+  const idPublicacion = req.params.idPublicacion;
+
+  try {
+    const comentarios = await pool.query(
+      `
+      SELECT
+        c.id_comentario,
+        c.comentario,
+        c.fecha_publicacion,
+        u.nombre,
+        u.foto_perfil
+      FROM public.comentario_publicacion c
+      JOIN public.usuario u
+        ON c.id_usuario = u.id_usuario
+      WHERE c.id_publicacion = $1
+      ORDER BY c.id_comentario DESC
+      `,
+      [idPublicacion]
+    );
+
+    res.json(comentarios.rows);
+
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({
+      error: 'Error cargando comentarios.'
+    });
+  }
+});
+
+/* ==========================
    SERVER
 ========================== */
 
