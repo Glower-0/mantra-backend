@@ -201,6 +201,33 @@ async function cargarComunidad(){
   }
 }
 
+    async function darLike(idPublicacion){
+  try{
+    const response = await fetch('/api/comunidad/like',{
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({
+        id_publicacion: idPublicacion,
+        id_usuario: usuario.id_usuario
+      })
+    });
+
+    const data = await response.json();
+
+    if(!response.ok){
+      alert(data.error || 'Error dando like');
+      return;
+    }
+
+    cargarComunidad();
+
+  }catch(error){
+    console.error(error);
+    alert('Error de conexión');
+  }
+}
+
+  
 async function toggleComentarios(idPublicacion){
   const box = document.getElementById(`comments-${idPublicacion}`);
 
@@ -284,31 +311,6 @@ function logout(){
 
 cargarComunidad();
 
-  async function darLike(idPublicacion){
-  try{
-    const response = await fetch('/api/comunidad/like',{
-      method:'POST',
-      headers:{'Content-Type':'application/json'},
-      body:JSON.stringify({
-        id_publicacion: idPublicacion,
-        id_usuario: usuario.id_usuario
-      })
-    });
-
-    const data = await response.json();
-
-    if(!response.ok){
-      alert(data.error || 'Error dando like');
-      return;
-    }
-
-    cargarComunidad();
-
-  }catch(error){
-    console.error(error);
-    alert('Error de conexión');
-  }
-}
 
 </script>
 
