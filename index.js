@@ -1436,6 +1436,180 @@ app.get('/api/usuario/:id', async (req, res) => {
     });
   }
 });
+/* ==========================
+   CHAT
+========================== */
+
+app.post('/api/chat/iniciar', async (req, res) => {
+  const { id_usuario_1, id_usuario_2 } = req.body;
+
+  try {
+    if (Number(id_usuario_1) === Number(id_usuario_2)) {
+      return res.status(400).json({ error: 'No puedes iniciar chat contigo mismo.' });
+    }
+
+    const existe = await pool.query(
+      `
+      SELECT id_conversacion
+      FROM public.conversacion
+      WHERE
+        (id_usuario_1 = $1 AND id_usuario_2 = $2)
+        OR
+        (id_usuario_1 = $2 AND id_usuario_2 = $1)
+      `,
+      [id_usuario_1, id_usuario_2]
+    );
+
+    if (existe.rows.length > 0) {
+      return res.json({
+        success: true,
+        id_conversacion: existe.rows[0].id_conversacion
+      });
+    }
+
+    const nextId = await pool.query(
+      `SELECT COALESCE(MAX(id_conversacion), 0) + 1 AS id FROM public.conversacion`
+    );
+
+    const idConversacion = nextId.rows[0].id;
+
+    await pool.query(
+      `
+      INSERT INTO public.conversacion
+      (id_conversacion, id_usuario_1, id_usuario_2, fecha_creacion)
+      VALUES ($1, $2, $3, CURRENT_TIMESTAMP)
+      `,
+      [idConversacion, id_usuario_1, id_usuario_2]
+    );
+
+    res.json({
+      success: true,
+      id_conversacion: idConversacion
+    });
+
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: 'Error iniciando chat.' });
+  }
+});
+
+app.get('/api/chat/conversaciones/:idUsuario', async (req, res) => {
+  const idUsuario = req.params.idUsuario;
+
+  try {
+    const conversaciones = await pool.query(
+      `
+      SELECT
+        c.id_conversacion,
+        c.fecha_creacion,
+
+        CASE
+          WHEN c.id_usuario_1 = $1 THEN u2.id_usuario
+          ELSE u1.id_usuario
+        END AS id_otro_usuario,
+
+        CASE
+          WHEN c.id_usuario_1 = $1 THEN u2.nombre
+          ELSE u1.nombre
+        END AS nombre_otro_usuario,
+
+        CASE
+          WHEN c.id_usuario_1 = $1 THEN u2.foto_perfil
+          ELSE u1.foto_perfil
+        END AS foto_otro_usuario,
+
+        (
+          SELECT m.contenido
+          FROM public.mensaje m
+          WHERE m.id_conversacion = c.id_conversacion
+          ORDER BY m.fecha_envio DESC
+          LIMIT 1
+        ) AS ultimo_mensaje
+
+      FROM public.conversacion c
+      JOIN public.usuario u1
+        ON c.id_usuario_1 = u1.id_usuario
+      JOIN public.usuario u2
+        ON c.id_usuario_2 = u2.id_usuario
+      WHERE c.id_usuario_1 = $1
+         OR c.id_usuario_2 = $1
+      ORDER BY c.fecha_creacion DESC
+      `,
+      [idUsuario]
+    );
+
+    res.json(conversaciones.rows);
+
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: 'Error cargando conversaciones.' });
+  }
+});
+
+app.get('/api/chat/mensajes/:idConversacion', async (req, res) => {
+  const idConversacion = req.params.idConversacion;
+
+  try {
+    const mensajes = await pool.query(
+      `
+      SELECT
+        m.id_mensaje,
+        m.id_conversacion,
+        m.id_emisor,
+        m.contenido,
+        m.fecha_envio,
+        u.nombre,
+        u.foto_perfil
+      FROM public.mensaje m
+      JOIN public.usuario u
+        ON m.id_emisor = u.id_usuario
+      WHERE m.id_conversacion = $1
+      ORDER BY m.fecha_envio ASC
+      `,
+      [idConversacion]
+    );
+
+    res.json(mensajes.rows);
+
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: 'Error cargando mensajes.' });
+  }
+});
+
+app.post('/api/chat/mensaje', async (req, res) => {
+  const { id_conversacion, id_emisor, contenido } = req.body;
+
+  try {
+    if (!contenido || contenido.trim() === '') {
+      return res.status(400).json({ error: 'El mensaje está vacío.' });
+    }
+
+    const nextId = await pool.query(
+      `SELECT COALESCE(MAX(id_mensaje), 0) + 1 AS id FROM public.mensaje`
+    );
+
+    const idMensaje = nextId.rows[0].id;
+
+    await pool.query(
+      `
+      INSERT INTO public.mensaje
+      (id_mensaje, id_conversacion, id_emisor, contenido, fecha_envio, leido)
+      VALUES ($1, $2, $3, $4, CURRENT_TIMESTAMP, false)
+      `,
+      [idMensaje, id_conversacion, id_emisor, contenido]
+    );
+
+    res.json({
+      success: true,
+      message: 'Mensaje enviado.'
+    });
+
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: 'Error enviando mensaje.' });
+  }
+});
 
 /* ==========================
    SERVER
