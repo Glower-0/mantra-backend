@@ -42,13 +42,37 @@ body{background:#07070a;color:white;min-height:100vh;}
 <nav class="navbar">
   <div class="logo">MANTRA</div>
   <div class="user-box">
-    <span id="userName">Usuario</span>
-    <button class="logout" style="background:#1d1d29;" onclick="window.location.href='perfil.html'">Mi perfil</button>
-    <button class="logout" onclick="logout()">Cerrar sesión</button>
-    <button class="logout" style="background:#1d1d29;" onclick="window.location.href='comunidad.html'">
-Comunidad
-</button>
-  </div>
+
+    <button class="logout" style="background:#1d1d29;"
+      onclick="window.location.href='feed-eventos.html'">
+      🏠 Feed
+    </button>
+
+    <button class="logout" style="background:#1d1d29;"
+      onclick="window.location.href='comunidad.html'">
+      🌐 Comunidad
+    </button>
+
+    <button class="logout" style="background:#1d1d29;"
+      onclick="window.location.href='social.html'">
+      👥 Social
+    </button>
+
+    <button class="logout" style="background:#1d1d29;"
+      onclick="window.location.href='perfil.html'">
+      👤 Perfil
+    </button>
+
+    <span id="userName" style="margin:0 10px;">
+      Usuario
+    </span>
+
+    <button class="logout"
+      onclick="logout()">
+      🚪 Salir
+    </button>
+
+</div>
 </nav>
 
 <section class="hero">
