@@ -173,21 +173,23 @@ async function cargarAmigos(){
       return;
     }
 
-    aamigos.forEach(a=>{
-  box.innerHTML += `
-    <div class="item">
-      <strong>${a.nombre}</strong>
-      <p>Amigo en MANTRA</p>
+    amigos.forEach(a=>{
+      box.innerHTML += `
+        <div class="item">
+          <strong>${a.nombre}</strong>
+          <p>Amigo en MANTRA</p>
 
-      <button class="btn" onclick="iniciarChat(${a.id_usuario})">
-        💬 Chat
-      </button>
-    </div>
-  `;
-});
+          <button class="btn" onclick="iniciarChat(${a.id_usuario})">
+            💬 Chat
+          </button>
+        </div>
+      `;
+    });
 
   }catch(error){
     console.error(error);
+    document.getElementById('amigosBox').innerHTML =
+      '<p class="empty">Error cargando amigos.</p>';
   }
 }
 
