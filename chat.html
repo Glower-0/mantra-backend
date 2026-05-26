@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MANTRA | Chat</title>
+
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+
+<style>
+*{margin:0;padding:0;box-sizing:border-box;font-family:'Poppins',sans-serif;}
+body{background:#07070a;color:white;min-height:100vh;}
+.navbar{display:flex;justify-content:space-between;align-items:center;padding:22px 7%;background:#0f0f16;border-bottom:1px solid rgba(255,255,255,.08);}
+.logo{font-size:1.9rem;font-weight:800;color:#00bfff;}
+.nav-actions{display:flex;gap:12px;flex-wrap:wrap;}
+.nav-btn{padding:10px 16px;border:none;border-radius:14px;background:#1d1d29;color:white;font-weight:600;cursor:pointer;}
+.logout{background:#ff4d4d;}
+.container{max-width:1200px;margin:35px auto;padding:0 20px;}
+.chat-layout{display:grid;grid-template-columns:330px 1fr;gap:25px;}
+.panel{background:#11111a;border:1px solid rgba(255,255,255,.08);border-radius:28px;overflow:hidden;}
+.panel-header{padding:22px;border-bottom:1px solid rgba(255,255,255,.08);}
+.panel-header h2{font-size:1.4rem;}
+.conversations{max-height:650px;overflow:auto;}
+.conversation{padding:18px 20px;border-bottom:1px solid rgba(255,255,255,.06);cursor:pointer;display:flex;gap:12px;align-items:center;}
+.conversation:hover{background:#1a1a25;}
+.avatar{width:48px;height:48px;border-radius:50%;background:#242433;display:flex;align-items:center;justify-content:center;overflow:hidden;color:#777;flex-shrink:0;}
+.avatar img{width:100%;height:100%;object-fit:cover;}
+.name{font-weight:700;}
+.last{color:#999;font-size:.9rem;margin-top:4px;}
+.chat-box{height:720px;display:flex;flex-direction:column;}
+.chat-title{padding:22px;border-bottom:1px solid rgba(255,255,255,.08);}
+.messages{flex:1;padding:22px;overflow:auto;display:flex;flex-direction:column;gap:12px;}
+.message{max-width:70%;padding:13px 16px;border-radius:18px;line-height:1.4;}
+.mine{align-self:flex-end;background:linear-gradient(135deg,#00bfff,#7c3aed);}
+.other{align-self:flex-start;background:#1d1d29;}
+.input-area{padding:18px;border-top:1px solid rgba(255,255,255,.08);display:flex;gap:12px;}
+.input-area input{flex:1;padding:15px;border:none;border-radius:16px;background:#1d1d29;color:white;outline:none;}
+.input-area button{padding:15px 22px;border:none;border-radius:16px;background:#00bfff;color:white;font-weight:700;cursor:pointer;}
+.empty{padding:30px;color:#888;text-align:center;}
+@media(max-width:850px){.chat-layout{grid-template-columns:1fr;}.chat-box{height:650px;}}
+</style>
+</head>
+
+<body>
+
+<nav class="navbar">
+  <div class="logo">MANTRA</div>
+
+  <div class="nav-actions">
+    <button class="nav-btn" onclick="window.location.href='feed-eventos.html'">🏠 Feed</button>
+    <button class="nav-btn" onclick="window.location.href='comunidad.html'">🌐 Comunidad</button>
+    <button class="nav-btn" onclick="window.location.href='social.html'">👥 Social</button>
+    <button class="nav-btn" onclick="window.location.href='perfil.html'">👤 Perfil</button>
+    <button class="nav-btn logout" onclick="logout()">🚪 Salir</button>
+  </div>
+</nav>
+
+<main class="container">
+
+<section class="chat-layout">
+
+  <aside class="panel">
+    <div class="panel-header">
+      <h2>Chats</h2>
+    </div>
+
+    <div class="conversations" id="conversacionesBox">
+      <p class="empty">Cargando chats...</p>
+    </div>
+  </aside>
+
+  <section class="panel chat-box">
+    <div class="chat-title">
+      <h2 id="chatTitulo">Selecciona una conversación</h2>
+    </div>
+
+    <div class="messages" id="mensajesBox">
+      <p class="empty">Tus mensajes aparecerán aquí.</p>
+    </div>
+
+    <div class="input-area">
+      <input id="mensajeInput" placeholder="Escribe un mensaje..." disabled>
+      <button onclick="enviarMensaje()" id="btnEnviar" disabled>Enviar</button>
+    </div>
+  </section>
+
+</section>
+
+</main>
+
+<script>
+const usuario = JSON.parse(localStorage.getItem('usuarioMantra'));
+
+if(!usuario){
+  window.location.href = 'index.html';
+}
+
+let conversacionActual = null;
+
+async function cargarConversaciones(){
+  try{
+    const response = await fetch(`/api/chat/conversaciones/${usuario.id_usuario}`);
+    const conversaciones = await response.json();
+
+    const box = document.getElementById('conversacionesBox');
+    box.innerHTML = '';
+
+    if(conversaciones.length === 0){
+      box.innerHTML = '<p class="empty">Aún no tienes chats.</p>';
+      return;
+    }
+
+    conversaciones.forEach(c=>{
+      box.innerHTML += `
+        <div class="conversation" onclick="abrirChat(${c.id_conversacion}, '${c.nombre_otro_usuario.replace(/'/g, "\\'")}')">
+          <div class="avatar">
+            ${c.foto_otro_usuario ? `<img src="${c.foto_otro_usuario}">` : '👤'}
+          </div>
+          <div>
+            <div class="name">${c.nombre_otro_usuario}</div>
+            <div class="last">${c.ultimo_mensaje || 'Sin mensajes todavía'}</div>
+          </div>
+        </div>
+      `;
+    });
+
+  }catch(error){
+    console.error(error);
+    document.getElementById('conversacionesBox').innerHTML =
+    '<p class="empty">Error cargando chats.</p>';
+  }
+}
+
+async function abrirChat(idConversacion, nombre){
+  conversacionActual = idConversacion;
+
+  document.getElementById('chatTitulo').innerText = nombre;
+  document.getElementById('mensajeInput').disabled = false;
+  document.getElementById('btnEnviar').disabled = false;
+
+  await cargarMensajes(idConversacion);
+}
+
+async function cargarMensajes(idConversacion){
+  try{
+    const response = await fetch(`/api/chat/mensajes/${idConversacion}`);
+    const mensajes = await response.json();
+
+    const box = document.getElementById('mensajesBox');
+    box.innerHTML = '';
+
+    if(mensajes.length === 0){
+      box.innerHTML = '<p class="empty">Aún no hay mensajes.</p>';
+      return;
+    }
+
+    mensajes.forEach(m=>{
+      const div = document.createElement('div');
+      div.className = `message ${Number(m.id_emisor) === Number(usuario.id_usuario) ? 'mine' : 'other'}`;
+      div.innerText = m.contenido;
+      box.appendChild(div);
+    });
+
+    box.scrollTop = box.scrollHeight;
+
+  }catch(error){
+    console.error(error);
+  }
+}
+
+async function enviarMensaje(){
+  const input = document.getElementById('mensajeInput');
+  const contenido = input.value.trim();
+
+  if(!conversacionActual){
+    alert('Selecciona una conversación.');
+    return;
+  }
+
+  if(!contenido){
+    return;
+  }
+
+  try{
+    const response = await fetch('/api/chat/mensaje',{
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({
+        id_conversacion: conversacionActual,
+        id_emisor: usuario.id_usuario,
+        contenido
+      })
+    });
+
+    const data = await response.json();
+
+    if(!response.ok){
+      alert(data.error || 'Error enviando mensaje');
+      return;
+    }
+
+    input.value = '';
+
+    await cargarMensajes(conversacionActual);
+    await cargarConversaciones();
+
+  }catch(error){
+    console.error(error);
+    alert('Error de conexión');
+  }
+}
+
+document.getElementById('mensajeInput').addEventListener('keydown', e=>{
+  if(e.key === 'Enter'){
+    enviarMensaje();
+  }
+});
+
+function logout(){
+  localStorage.removeItem('usuarioMantra');
+  window.location.href = 'index.html';
+}
+
+cargarConversaciones();
+</script>
+
+</body>
+</html>
