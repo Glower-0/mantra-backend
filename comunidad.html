@@ -340,7 +340,40 @@ async function crearComentario(idPublicacion){
     alert('Error de conexión');
   }
 }
+async function agregarAmigo(idUsuarioDestino){
 
+  if(idUsuarioDestino === usuario.id_usuario){
+    alert('No puedes agregarte a ti mismo.');
+    return;
+  }
+
+  try{
+
+    const response = await fetch('/api/amigos/solicitar',{
+      method:'POST',
+      headers:{
+        'Content-Type':'application/json'
+      },
+      body:JSON.stringify({
+        id_usuario_1: usuario.id_usuario,
+        id_usuario_2: idUsuarioDestino
+      })
+    });
+
+    const data = await response.json();
+
+    if(!response.ok){
+      alert(data.error || 'Error');
+      return;
+    }
+
+    alert('Solicitud enviada');
+
+  }catch(error){
+    console.error(error);
+    alert('Error de conexión');
+  }
+}
 function logout(){
   localStorage.removeItem('usuarioMantra');
   window.location.href = 'index.html';
