@@ -903,27 +903,53 @@ app.post('/api/comunidad/publicar', async (req, res) => {
 app.get('/api/comunidad/feed', async (req, res) => {
   try {
     const publicaciones = await pool.query(
-      `
+          `
       SELECT
         p.id_publicacion,
         p.contenido,
         p.fecha_publicacion,
         p.id_usuario,
+        p.imagen_url,
+
         u.nombre,
         u.foto_perfil,
+
         e.titulo AS evento_titulo,
         e.imagen_url AS evento_imagen,
+
+        COUNT(l.id_usuario) AS total_likes,
+
         CASE
           WHEN o.id_usuario IS NOT NULL THEN 'organizador'
           ELSE 'asistidor'
         END AS rol
+
       FROM public.publicacion_comunidad p
+
       JOIN public.usuario u
         ON p.id_usuario = u.id_usuario
+
       LEFT JOIN public.organizador o
         ON u.id_usuario = o.id_usuario
+
       LEFT JOIN public.evento e
         ON p.id_evento = e.id_evento
+
+      LEFT JOIN public.like_publicacion l
+        ON p.id_publicacion = l.id_publicacion
+
+      GROUP BY
+        p.id_publicacion,
+        p.contenido,
+        p.fecha_publicacion,
+        p.id_usuario,
+        p.imagen_url,
+        u.nombre,
+        u.foto_perfil,
+        o.id_usuario,
+        e.titulo,
+        e.imagen_url
+
       ORDER BY p.id_publicacion DESC
       `
     );
