@@ -273,7 +273,6 @@ app.get('/api/feed', async (req, res) => {
         e.ciudad,
         e.imagen_url,
         e.id_organizador,
-        u.id_usuario,
         c.nombre_cat
       FROM public.evento e
       LEFT JOIN public.evento_categoria ec
@@ -846,6 +845,7 @@ app.get('/api/comentarios/:idEvento', async (req, res) => {
         c.id_comentario,
         c.comentario,
         c.fecha_publicacion,
+         u.id_usuario,
         u.nombre,
         u.foto_perfil
       FROM public.comentario_evento c
