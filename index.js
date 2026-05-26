@@ -1404,6 +1404,37 @@ app.get('/api/logros/:idUsuario', async (req, res) => {
     res.status(500).json({ error: 'Error cargando logros.' });
   }
 });
+app.get('/api/usuario/:id', async (req, res) => {
+  const id = req.params.id;
+
+  try {
+    const usuario = await pool.query(
+      `
+      SELECT
+        id_usuario,
+        nombre,
+        foto_perfil
+      FROM public.usuario
+      WHERE id_usuario = $1
+      `,
+      [id]
+    );
+
+    if(usuario.rows.length === 0){
+      return res.status(404).json({
+        error:'Usuario no encontrado'
+      });
+    }
+
+    res.json(usuario.rows[0]);
+
+  } catch(error){
+    console.error(error);
+    res.status(500).json({
+      error:'Error obteniendo usuario'
+    });
+  }
+});
 
 /* ==========================
    SERVER
