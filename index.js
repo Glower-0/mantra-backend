@@ -1133,6 +1133,277 @@ app.get('/api/notificaciones/:idUsuario', async (req, res) => {
     res.status(500).json({ error: 'Error cargando notificaciones.' });
   }
 });
+/* ==========================
+   AMIGOS
+========================== */
+
+app.post('/api/amigos/solicitar', async (req, res) => {
+  const { id_usuario_1, id_usuario_2 } = req.body;
+
+  try {
+    if (Number(id_usuario_1) === Number(id_usuario_2)) {
+      return res.status(400).json({ error: 'No puedes agregarte a ti mismo.' });
+    }
+
+    await pool.query(
+      `
+      INSERT INTO public.amistad
+      (id_usuario_1, id_usuario_2, estado, fecha_solicitud)
+      VALUES ($1, $2, 'pendiente', CURRENT_DATE)
+      ON CONFLICT DO NOTHING
+      `,
+      [id_usuario_1, id_usuario_2]
+    );
+
+    const nextNotif = await pool.query(
+      `SELECT COALESCE(MAX(id_notificacion), 0) + 1 AS id FROM public.notificacion`
+    );
+
+    await pool.query(
+      `
+      INSERT INTO public.notificacion
+      (id_notificacion, id_usuario_destino, mensaje, leida, fecha_creacion)
+      VALUES ($1, $2, $3, false, CURRENT_DATE)
+      `,
+      [
+        nextNotif.rows[0].id,
+        id_usuario_2,
+        'Tienes una nueva solicitud de amistad.'
+      ]
+    );
+
+    res.json({ success: true, message: 'Solicitud enviada.' });
+
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: 'Error enviando solicitud.' });
+  }
+});
+
+app.put('/api/amigos/aceptar', async (req, res) => {
+  const { id_usuario_1, id_usuario_2 } = req.body;
+
+  try {
+    await pool.query(
+      `
+      UPDATE public.amistad
+      SET estado = 'aceptada'
+      WHERE id_usuario_1 = $1
+      AND id_usuario_2 = $2
+      `,
+      [id_usuario_1, id_usuario_2]
+    );
+
+    res.json({ success: true, message: 'Solicitud aceptada.' });
+
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: 'Error aceptando solicitud.' });
+  }
+});
+
+app.get('/api/amigos/:idUsuario', async (req, res) => {
+  const idUsuario = req.params.idUsuario;
+
+  try {
+    const amigos = await pool.query(
+      `
+      SELECT
+        u.id_usuario,
+        u.nombre,
+        u.foto_perfil
+      FROM public.amistad a
+      JOIN public.usuario u
+        ON (
+          CASE
+            WHEN a.id_usuario_1 = $1 THEN a.id_usuario_2
+            ELSE a.id_usuario_1
+          END
+        ) = u.id_usuario
+      WHERE (a.id_usuario_1 = $1 OR a.id_usuario_2 = $1)
+      AND a.estado = 'aceptada'
+      `,
+      [idUsuario]
+    );
+
+    res.json(amigos.rows);
+
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: 'Error cargando amigos.' });
+  }
+});
+
+app.get('/api/amigos/solicitudes/:idUsuario', async (req, res) => {
+  const idUsuario = req.params.idUsuario;
+
+  try {
+    const solicitudes = await pool.query(
+      `
+      SELECT
+        a.id_usuario_1,
+        u.nombre,
+        u.foto_perfil
+      FROM public.amistad a
+      JOIN public.usuario u
+        ON a.id_usuario_1 = u.id_usuario
+      WHERE a.id_usuario_2 = $1
+      AND a.estado = 'pendiente'
+      `,
+      [idUsuario]
+    );
+
+    res.json(solicitudes.rows);
+
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: 'Error cargando solicitudes.' });
+  }
+});
+
+/* ==========================
+   NOTIFICACIONES
+========================== */
+
+app.get('/api/notificaciones/:idUsuario', async (req, res) => {
+  const idUsuario = req.params.idUsuario;
+
+  try {
+    const notificaciones = await pool.query(
+      `
+      SELECT *
+      FROM public.notificacion
+      WHERE id_usuario_destino = $1
+      ORDER BY id_notificacion DESC
+      `,
+      [idUsuario]
+    );
+
+    res.json(notificaciones.rows);
+
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: 'Error cargando notificaciones.' });
+  }
+});
+
+app.put('/api/notificaciones/leer/:id', async (req, res) => {
+  const id = req.params.id;
+
+  try {
+    await pool.query(
+      `
+      UPDATE public.notificacion
+      SET leida = true
+      WHERE id_notificacion = $1
+      `,
+      [id]
+    );
+
+    res.json({ success: true });
+
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: 'Error actualizando notificación.' });
+  }
+});
+
+/* ==========================
+   LOGROS
+========================== */
+
+app.post('/api/logros/revisar/:idUsuario', async (req, res) => {
+  const idUsuario = req.params.idUsuario;
+
+  try {
+    const stats = await pool.query(
+      `
+      SELECT
+        COUNT(DISTINCT a.id_evento) AS eventos,
+        COUNT(DISTINCT r.id_resena) AS resenas
+      FROM public.usuario u
+      LEFT JOIN public.asistencia a
+        ON u.id_usuario = a.id_participante
+      LEFT JOIN public.resena r
+        ON u.id_usuario = r.id_participante
+      WHERE u.id_usuario = $1
+      `,
+      [idUsuario]
+    );
+
+    const eventos = Number(stats.rows[0].eventos || 0);
+    const resenas = Number(stats.rows[0].resenas || 0);
+
+    const logros = [];
+
+    if (eventos >= 1) {
+      logros.push(['Primer evento', 'Asististe a tu primer evento.']);
+    }
+
+    if (eventos >= 5) {
+      logros.push(['Explorador MANTRA', 'Has asistido a 5 eventos.']);
+    }
+
+    if (resenas >= 1) {
+      logros.push(['Primera reseña', 'Publicaste tu primera reseña.']);
+    }
+
+    for (const logro of logros) {
+      const existe = await pool.query(
+        `
+        SELECT id_logro
+        FROM public.logro_usuario
+        WHERE id_usuario = $1
+        AND nombre_logro = $2
+        `,
+        [idUsuario, logro[0]]
+      );
+
+      if (existe.rows.length === 0) {
+        const nextId = await pool.query(
+          `SELECT COALESCE(MAX(id_logro), 0) + 1 AS id FROM public.logro_usuario`
+        );
+
+        await pool.query(
+          `
+          INSERT INTO public.logro_usuario
+          (id_logro, id_usuario, nombre_logro, descripcion, fecha_obtenido)
+          VALUES ($1, $2, $3, $4, CURRENT_DATE)
+          `,
+          [nextId.rows[0].id, idUsuario, logro[0], logro[1]]
+        );
+      }
+    }
+
+    res.json({ success: true });
+
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: 'Error revisando logros.' });
+  }
+});
+
+app.get('/api/logros/:idUsuario', async (req, res) => {
+  const idUsuario = req.params.idUsuario;
+
+  try {
+    const logros = await pool.query(
+      `
+      SELECT *
+      FROM public.logro_usuario
+      WHERE id_usuario = $1
+      ORDER BY id_logro DESC
+      `,
+      [idUsuario]
+    );
+
+    res.json(logros.rows);
+
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: 'Error cargando logros.' });
+  }
+});
 
 /* ==========================
    SERVER
