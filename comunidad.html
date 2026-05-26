@@ -281,10 +281,21 @@ async function cargarComentarios(idPublicacion){
 
     comentarios.forEach(com=>{
       lista.innerHTML += `
-        <div class="comment-item">
-          <strong>${com.nombre}</strong>
-          <p style="color:#ccc;">${com.comentario}</p>
-          <small style="color:#777;">${new Date(com.fecha_publicacion).toLocaleDateString('es-MX')}</small>
+        <div style="display:flex;justify-content:space-between;align-items:center;">
+        <strong>${com.nombre}</strong>
+
+        <button
+        onclick="agregarAmigo(${com.id_usuario})"
+        style="
+        background:#00bfff;
+        border:none;
+        color:white;
+        padding:6px 10px;
+        border-radius:10px;
+        cursor:pointer;
+        ">
+      ➕ Amigo
+        </button>
         </div>
       `;
     });
