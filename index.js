@@ -1000,6 +1000,113 @@ app.get('/api/comunidad/comentarios/:idPublicacion', async (req, res) => {
     });
   }
 });
+/* ==========================
+   PUBLICACIÓN CON IMAGEN
+========================== */
+
+app.post('/api/comunidad/publicar-imagen', upload.single('imagen'), async (req, res) => {
+  const { contenido, id_usuario, id_evento } = req.body;
+
+  try {
+    const imagen_url = req.file
+      ? await subirACloudinary(req.file.buffer, 'mantra/comunidad')
+      : null;
+
+    const nextId = await pool.query(
+      `SELECT COALESCE(MAX(id_publicacion), 0) + 1 AS id FROM public.publicacion_comunidad`
+    );
+
+    const idPublicacion = nextId.rows[0].id;
+
+    await pool.query(
+      `
+      INSERT INTO public.publicacion_comunidad
+      (id_publicacion, contenido, fecha_publicacion, id_usuario, id_evento, imagen_url)
+      VALUES ($1, $2, CURRENT_DATE, $3, $4, $5)
+      `,
+      [idPublicacion, contenido, id_usuario, id_evento || null, imagen_url]
+    );
+
+    res.json({ success: true, message: 'Publicación creada.' });
+
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: 'Error creando publicación.' });
+  }
+});
+
+/* ==========================
+   LIKES
+========================== */
+
+app.post('/api/comunidad/like', async (req, res) => {
+  const { id_publicacion, id_usuario } = req.body;
+
+  try {
+    await pool.query(
+      `
+      INSERT INTO public.like_publicacion
+      (id_publicacion, id_usuario)
+      VALUES ($1, $2)
+      ON CONFLICT DO NOTHING
+      `,
+      [id_publicacion, id_usuario]
+    );
+
+    res.json({ success: true });
+
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: 'Error dando like.' });
+  }
+});
+
+app.delete('/api/comunidad/like', async (req, res) => {
+  const { id_publicacion, id_usuario } = req.body;
+
+  try {
+    await pool.query(
+      `
+      DELETE FROM public.like_publicacion
+      WHERE id_publicacion = $1
+      AND id_usuario = $2
+      `,
+      [id_publicacion, id_usuario]
+    );
+
+    res.json({ success: true });
+
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: 'Error quitando like.' });
+  }
+});
+
+/* ==========================
+   NOTIFICACIONES
+========================== */
+
+app.get('/api/notificaciones/:idUsuario', async (req, res) => {
+  const idUsuario = req.params.idUsuario;
+
+  try {
+    const resultado = await pool.query(
+      `
+      SELECT *
+      FROM public.notificacion
+      WHERE id_usuario_destino = $1
+      ORDER BY id_notificacion DESC
+      `,
+      [idUsuario]
+    );
+
+    res.json(resultado.rows);
+
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: 'Error cargando notificaciones.' });
+  }
+});
 
 /* ==========================
    SERVER
