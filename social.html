@@ -277,9 +277,12 @@ async function cargarLogros(){
   
 async function iniciarChat(idAmigo){
   try{
+
     const response = await fetch('/api/chat/iniciar',{
       method:'POST',
-      headers:{'Content-Type':'application/json'},
+      headers:{
+        'Content-Type':'application/json'
+      },
       body:JSON.stringify({
         id_usuario_1: usuario.id_usuario,
         id_usuario_2: idAmigo
