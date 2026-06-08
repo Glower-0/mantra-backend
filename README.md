@@ -251,7 +251,7 @@ Además, se implementaron relaciones de especialización, relaciones N:M y mecan
 
 📄 Documento de entrevista:
 
-[Ver Entrevista](./docs/Entrevista_MANTRA.pdf)
+[Ver Entrevista](Entrevista_MANTRA.pdf)
 ---
 
 # 💻 Código Fuente
@@ -270,9 +270,9 @@ AQUI_PEGA_LINK_DE_TU_DEMO
 
 ---
 
-# 👨‍💻 Autor
+# 👨‍💻 Autores
 
-**Julio Milan**
+**Julio Milan y Armenta Misael**
 
 Proyecto desarrollado para la asignatura de Bases de Datos.
 
