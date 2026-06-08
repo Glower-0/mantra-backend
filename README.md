@@ -183,7 +183,8 @@ Además, se implementaron relaciones de especialización, relaciones N:M y mecan
 
 <td align="center">
 <b>Diagrama EER</b><br><br>
-<img src="AQUI_PEGA_LINK_DIAGRAMA_EER" width="500">
+<img src="https://github.com/user-attachments/assets/ae83f892-5ab9-4c1b-8d89-c92a39e6c2df" width="500">
+
 
 </td>
 </tr>
