@@ -247,11 +247,11 @@ Además, se implementaron relaciones de especialización, relaciones N:M y mecan
 ---
 
 # 🎥 Entrevista
+## 🎥 Entrevista
 
-Video de levantamiento de requerimientos:
+📄 Documento de entrevista:
 
-🔗 AQUI_PEGA_LINK_DE_LA_ENTREVISTA
-
+[Ver Entrevista](./docs/Entrevista_MANTRA.pdf)
 ---
 
 # 💻 Código Fuente
