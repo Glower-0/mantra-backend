@@ -178,12 +178,13 @@ Además, se implementaron relaciones de especialización, relaciones N:M y mecan
 <tr>
 <td align="center">
 <b>Diagrama Relacional</b><br><br>
-<img src="AQUI_PEGA_LINK_DIAGRAMA_RELACIONAL" width="500">
+<img src="https://github.com/user-attachments/assets/6a5e9428-c32a-4034-b162-d5340e1357b9" width="500">
 </td>
 
 <td align="center">
 <b>Diagrama EER</b><br><br>
 <img src="AQUI_PEGA_LINK_DIAGRAMA_EER" width="500">
+
 </td>
 </tr>
 </table>
