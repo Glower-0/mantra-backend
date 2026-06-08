@@ -160,10 +160,9 @@ Además, se implementaron relaciones de especialización, relaciones N:M y mecan
 
 | Rol | Descripción |
 |------|------------|
-| Admin | Control total del sistema |
 | Organizador | Gestión de eventos |
 | Participante | Asistencia y reseñas |
-| Aplicación | Conexión Backend |
+
 
 ---
 
@@ -249,26 +248,18 @@ Además, se implementaron relaciones de especialización, relaciones N:M y mecan
 ---
 
 # 🎥 Entrevista
-## 🎥 Entrevista
+
 
 📄 Documento de entrevista:
 
 [Ver Entrevista](Entrevista_MANTRA.pdf)
 ---
 
-# 💻 Código Fuente
-
-🔗 Repositorio GitHub:
-
-AQUI_PEGA_LINK_DE_TU_REPOSITORIO
-
----
-
 # 🚀 Demo
 
 🔗 Demo en línea:
 
-AQUI_PEGA_LINK_DE_TU_DEMO
+https://mantra-backend-24g1.onrender.com/
 
 ---
 
