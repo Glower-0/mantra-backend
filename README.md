@@ -279,4 +279,4 @@ La utilización de PostgreSQL permitió implementar restricciones avanzadas, rel
 
 Finalmente, el proyecto demuestra cómo una adecuada planeación de la arquitectura de datos puede convertirse en la base de una aplicación moderna, escalable y preparada para escenarios reales de uso.
 
-Prueba pull request
+Prueba pull requestt
