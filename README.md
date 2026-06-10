@@ -278,3 +278,5 @@ El desarrollo de MANTRA permitió aplicar de manera integral los conceptos funda
 La utilización de PostgreSQL permitió implementar restricciones avanzadas, relaciones complejas y mecanismos de control de acceso mediante roles, garantizando la consistencia de los datos y el cumplimiento de las reglas de negocio definidas durante el levantamiento de requerimientos.
 
 Finalmente, el proyecto demuestra cómo una adecuada planeación de la arquitectura de datos puede convertirse en la base de una aplicación moderna, escalable y preparada para escenarios reales de uso.
+
+Prueba pull request
